@@ -1,10 +1,13 @@
 use std::io::{ self, Write };
 
+use byteorder::{ LittleEndian, WriteBytesExt};
+
 pub struct Submessage(pub SubmessageType, pub Vec<u8>);
 
 bitflags! {
   flags SubmessageType : u8 {
-    const PAD = 0x01, /* Pad */
+    // const PAD = 0x01, /* Pad */
+    const LITTLEENDIAN = 0x01, /* Xavier's Endianness hack? */
     const ACKNACK = 0x06, /* AckNack */
     const HEARTBEAT = 0x07, /* Heartbeat */
     const GAP = 0x08, /* Gap */
@@ -22,6 +25,15 @@ bitflags! {
 
 impl Submessage {
   pub fn serialize<W: Write>(&self, mut w: &mut W) -> io::Result<()> {
+    let mut flags = self.0;
+    // flags.toggle(LITTLEENDIAN);
+    flags = flags | LITTLEENDIAN;
+
+    let flags_arr = [flags.bits];
+    try!(w.write_all(&flags_arr[..]));
+
+    try!(w.write_u16::<LittleEndian>(self.1.len() as u16));
+
     w.write_all(&self.1[..])
   }
 }

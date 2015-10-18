@@ -54,10 +54,18 @@ mod tests {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       // submessage_0 index
       0,
+      // submessage_0 flags
+      0x15,
+      // submessage_0 len
+      4, 0,
       // submessage_0 body
       0, 1, 2, 3,
       // subessage_1 index
       1,
+      // submessage_1 flags
+      0x15,
+      // submessage_1 len
+      4, 0,
       // submessage_1 body
       4, 5, 6, 7
     ];
