@@ -7,3 +7,10 @@ Find the spec here: [http://www.omg.org/spec/DDSI-RTPS/2.2/PDF/](http://www.omg.
 
   - [ ] 9.4.4 Mapping of the RTPS Header
 
+TODO
+----
+
+ - [ ] Serialize Message/Submessage
+ - [ ] Deserialize Message/Submessage
+ - [ ] UDP test client
+ - [ ] Interop test with OpenDDS / OpenSplice
