@@ -18,7 +18,7 @@ pub struct Header {
 }
 
 impl Header {
-  pub fn serialize<W: Write>(&self, mut w: W) -> io::Result<()> {
+  pub fn serialize_old<W: Write>(&self, mut w: W) -> io::Result<()> {
     try!(w.write_all(RTPS));
     try!(self.protocol_version.serialize(&mut w));
     try!(self.vendor_id.serialize(&mut w));
@@ -33,14 +33,14 @@ mod tests {
   use super::super::header::*;
 
   #[test]
-  fn test_serialize() {
+  fn test_serialize_old() {
     let h = Header{
       protocol_version: ProtocolVersion(2,2),
       vendor_id: VendorId(2),
       guid_prefix: GUIDPrefix(GUIDPREFIX_UNKNOWN)
     };
     let mut buf = vec![];
-    h.serialize(&mut buf).unwrap();
+    h.serialize_old(&mut buf).unwrap();
 
     let expected = vec![
       // 'RTPS'

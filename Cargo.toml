@@ -6,3 +6,11 @@ authors = ["Xavier Lange <xrlange@gmail.com>"]
 [dependencies]
 "byteorder" = "*"
 "bitflags" = "*"
+"net2" = "*"
+"serde" = "*"
+"serde_json" = "*"
+
+
+[[bin]]
+name = "multicast"
+# src = "src/bin/multicast.rs"
