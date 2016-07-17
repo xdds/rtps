@@ -2,56 +2,70 @@ pub mod types;
 pub mod header;
 pub mod submessage;
 
+use serde::ser::{ Serialize, Serializer };
+use serde::ser::impls::SeqIteratorVisitor;
+use byteorder::{ ByteOrder, LittleEndian };
+
 use self::submessage::*;
 
 pub struct Message {
-  submessages: Vec<Submessage>
+    submessages: Vec<Submessage>
+}
+
+const VERSION_BYTES : [u8; 2] = [10, 20];
+const VENDOR_ID : [u8; 2] = [19, 86];
+
+
+impl Serialize for Message {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {
+        try!(serializer.serialize_str("RTPS"));
+
+        try!(serializer.serialize_u16(LittleEndian::read_u16(&VERSION_BYTES)));
+        try!(serializer.serialize_u16(LittleEndian::read_u16(&VENDOR_ID)));
+
+
+        let visitor = SeqIteratorVisitor::new(self.submessages.iter(), Some(self.submessages.len()));
+        serializer.serialize_seq(visitor)
+    }
 }
 
 #[cfg(test)]
 mod tests {
-//  use Message;
-//  use submessage::*;
+    use Message;
+    use submessage::{Submessage, SubmessageId};
+    use super::super::{CdrSerializer, CdrEndianness};
 
-//  #[test]
-//  fn serializes(){
-//    let m = Message{
-//      submessages: vec![
-//        Submessage(DATA, vec![0,1,2,3]),
-//        Submessage(DATA, vec![4,5,6,7])
-//      ]
-//    };
-//    let mut buf = vec![];
-//    m.serialize_old(&mut buf).unwrap();
-//
-//    let expected = vec![
-//      // 'RTPS'
-//      82, 84, 80, 83,
-//      // protocol_version
-//      2, 2,
-//      // vendor_id
-//      2, 0,
-//      // guid_prefix
-//      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//      // submessage_0 index
-//      0,
-//      // submessage_0 flags
-//      0x15,
-//      // submessage_0 len
-//      4, 0,
-//      // submessage_0 body
-//      0, 1, 2, 3,
-//      // subessage_1 index
-//      1,
-//      // submessage_1 flags
-//      0x15,
-//      // submessage_1 len
-//      4, 0,
-//      // submessage_1 body
-//      4, 5, 6, 7
-//    ];
-//
-//    assert_eq!(buf, expected);
-//  }
+    use serde::ser::Serialize;
+
+    //  use submessage::*;
+
+    #[test]
+    fn serializes(){
+        let buf : Vec<u8> = vec![];
+        let m = Message {
+            submessages: vec![
+                Submessage(SubmessageId::DATA,
+                    CdrEndianness::Little,
+                    vec![1,2,3,4]
+                )
+            ]
+        };
+        let mut serializer = CdrSerializer{
+            endianness: CdrEndianness::Big,
+            write_handle: buf
+        };
+
+        m.serialize(&mut serializer).unwrap();
+
+        let expected = vec![
+            82, 84, 80, 83, // RTPS
+            20, 10, // Protocol Type
+            86, 19, // Vendor id
+            0, 0, 0, 1, // Submessage count
+
+        ];
+
+        assert_eq!(serializer.write_handle, expected);
+    }
 
 }

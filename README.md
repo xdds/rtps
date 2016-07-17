@@ -13,4 +13,4 @@ TODO
  - [ ] Serialize Message/Submessage
  - [ ] Deserialize Message/Submessage
  - [ ] UDP test client
- - [ ] Interop test with OpenDDS / OpenSplice
+ - [ ] Interop test with https://github.com/eProsima/Fast-RTPS

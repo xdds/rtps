@@ -42,24 +42,6 @@ impl Serialize for SubmessageId {
 
 pub struct Submessage(pub SubmessageId, pub CdrEndianness, pub Vec<u8>);
 
-//bitflags! {
-//  pub flags SubmessageType : u8 {
-//    const PAD = 0x01, /* Pad */
-//    const ACKNACK = 0x06, /* AckNack */
-//    const HEARTBEAT = 0x07, /* Heartbeat */
-//    const GAP = 0x08, /* Gap */
-//    const INFO_TS = 0x09, /* InfoTimestamp */
-//    const INFO_SRC = 0x0c, /* InfoSource */
-//    const INFO_REPLY_IP4 = 0x0d, /* InfoReplyIp4 */
-//    const INFO_DST = 0x0e, /* InfoDestination */
-//    const INFO_REPLY = 0x0f, /* InfoReply */
-//    const NACK_FRAG = 0x12, /* NackFrag */
-//    const HEARTBEAT_FRAG = 0x13, /* HeartbeatFrag */
-//    const DATA = 0x15, /* Data */
-//    const DATA_FRAG = 0x16, /* DataFrag */
-//  }
-//}
-
 impl Serialize for Submessage {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {
         // Write the submessage id
@@ -101,9 +83,9 @@ mod tests {
         };
         submessage.serialize(&mut serializer).unwrap();
         let expected = vec![0x15, 1,
-        0, 0, 0, 4,
-        1, 2, 3, 4
-    ];
+            0, 0, 0, 4,
+            1, 2, 3, 4
+        ];
         assert_eq!(serializer.write_handle, expected);
     }
 }

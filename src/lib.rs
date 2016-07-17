@@ -2,7 +2,6 @@
 #![feature(custom_derive)]
 #![feature(rustc_private)]
 
-#[macro_use] extern crate bitflags;
 #[macro_use] extern crate log;
 
 extern crate serde;
