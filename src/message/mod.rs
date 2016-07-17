@@ -62,7 +62,9 @@ mod tests {
             20, 10, // Protocol Type
             86, 19, // Vendor id
             0, 0, 0, 1, // Submessage count
-
+            21, 1,
+            0, 0, 0, 4,
+            1, 2, 3, 4
         ];
 
         assert_eq!(serializer.write_handle, expected);
