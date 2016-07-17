@@ -1,8 +1,8 @@
 #![allow(dead_code)]
-#![feature(custom_derive)]
-#![feature(rustc_private)]
+// #![feature(custom_derive)]
+// #![feature(rustc_private)]
 
-#[macro_use] extern crate log;
+//#[macro_use] extern crate log;
 
 extern crate serde;
 extern crate serde_json;
