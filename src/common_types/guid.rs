@@ -1,0 +1,1 @@
+pub type Guid = [u8; 16];

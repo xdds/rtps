@@ -1,12 +1,11 @@
 use common_types::*;
 use super::super::{SubmessageContent,SubmessageId,SubmessageFlags};
 
-pub struct InfoReply {
-    pub unicast_locator_list: LocatorList,
-    pub multicast_locator_list: Option<LocatorList>,
+pub struct Pad {
+    pub size: u16,
 }
 
-impl SubmessageContent for InfoReply {
+impl SubmessageContent for Pad {
     fn submessage_id() -> SubmessageId {
         unimplemented!()
     }

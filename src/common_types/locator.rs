@@ -3,3 +3,5 @@ pub struct Locator {
     pub port: u32,
     pub address: [u8; 16],
 }
+
+pub type LocatorList = Vec<Locator>;

@@ -1,12 +1,15 @@
 use common_types::*;
 use super::super::{SubmessageContent,SubmessageId,SubmessageFlags};
 
-pub struct InfoReply {
-    pub unicast_locator_list: LocatorList,
-    pub multicast_locator_list: Option<LocatorList>,
+pub struct NackFrag {
+    pub reader_id: EntityId,
+    pub writer_id: EntityId,
+    pub writer_sn: SequenceNumber,
+    pub fragment_number_state: FragmentNumberSet,
+    pub count: Count,
 }
 
-impl SubmessageContent for InfoReply {
+impl SubmessageContent for NackFrag {
     fn submessage_id() -> SubmessageId {
         unimplemented!()
     }
