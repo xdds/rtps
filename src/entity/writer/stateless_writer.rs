@@ -20,12 +20,12 @@ pub struct StatelessWriter {
     _secret: (),
 }
 
-impl Writer {
+impl StatelessWriter {
     fn new(guid: Guid, unicast_locator_list: LocatorList, multicast_locator_list: LocatorList,
            reliability_level: ReliabilityKind, topic_kind: TopicKind, push_mode: bool,
            heartbeat_period: Duration, nack_response_delay: Duration,
            nack_suppression_duration: Duration) -> Self {
-        Writer {
+        StatelessWriter {
             guid: guid,
             unicast_locator_list: unicast_locator_list,
             multicast_locator_list: multicast_locator_list,
@@ -62,13 +62,13 @@ impl Writer {
     }
 }
 
-impl EntityTrait for Writer {
+impl EntityTrait for StatelessWriter {
     fn guid(&self) -> Guid {
         self.guid
     }
 }
 
-impl EndpointTrait for Writer {
+impl EndpointTrait for StatelessWriter {
     fn topic_kind(&self) -> TopicKind {
         self.topic_kind
     }
