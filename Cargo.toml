@@ -11,6 +11,6 @@ authors = ["Xavier Lange <xrlange@gmail.com>"]
 "serde_json" = "*"
 
 
-[[bin]]
-name = "multicast"
+# [[bin]]
+# name = "multicast"
 # src = "src/bin/multicast.rs"

@@ -1,6 +1,12 @@
-use super::super::cdr::ser::CdrEndianness;
+use cdr::CdrEndianness;
 use serde::ser::{ Serialize, Serializer };
 use serde::ser::impls::SeqIteratorVisitor;
+
+mod content;
+pub use self::content::*;
+
+mod traits;
+pub use self::traits::*;
 
 #[allow(non_camel_case_types)]
 pub enum SubmessageId {
@@ -40,6 +46,19 @@ impl Serialize for SubmessageId {
     }
 }
 
+bitflags! {
+    pub flags SubmessageFlags: u8 {
+        const LITTLE_ENDIAN = 0x01,
+        const ACK_NACK_FINAL_FLAG = 0x02,
+
+        const DATA_INLINE_QOS = 0x02,
+        const DATA_DATA = 0x04,
+        const DATA_KEY = 0x08,
+        const DATA_FRAG_INLINE_QOS = 0x02,
+        // eh, will add more as-needed
+    }
+}
+
 pub struct Submessage(pub SubmessageId, pub CdrEndianness, pub Vec<u8>);
 
 impl Serialize for Submessage {
@@ -65,8 +84,7 @@ impl Serialize for Submessage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::super::{CdrSerializer};
-    use super::super::super::cdr::ser::CdrEndianness;
+    use super::super::cdr::{CdrSerializer,CdrEndianness};
     use serde::ser::Serialize;
 
     #[test]

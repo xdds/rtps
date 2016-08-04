@@ -1,12 +1,11 @@
 pub mod types;
 pub mod header;
-pub mod submessage;
 
 use serde::ser::{ Serialize, Serializer };
 use serde::ser::impls::SeqIteratorVisitor;
 use byteorder::{ ByteOrder, LittleEndian };
 
-use self::submessage::*;
+use submessage::*;
 
 pub struct Message {
     submessages: Vec<Submessage>
@@ -33,7 +32,7 @@ impl Serialize for Message {
 mod tests {
     use Message;
     use submessage::{Submessage, SubmessageId};
-    use super::super::{CdrSerializer, CdrEndianness};
+    use super::super::cdr::{CdrSerializer, CdrEndianness};
 
     use serde::ser::Serialize;
 

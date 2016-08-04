@@ -1,1 +1,2 @@
-pub mod ser;
+mod ser;
+pub use self::ser::*;
