@@ -1,6 +1,7 @@
 use super::super::common_types::*;
 use super::EntityTrait;
 
+#[derive(Default)]
 pub struct Reader {
     guid: Guid,
 }

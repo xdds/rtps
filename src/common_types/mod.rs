@@ -1,3 +1,6 @@
+mod cache_change;
+pub use self::cache_change::*;
+
 mod change_kind;
 pub use self::change_kind::*;
 
@@ -30,6 +33,9 @@ pub use self::locator::*;
 
 mod parameter_list;
 pub use self::parameter_list::*;
+
+mod protocol_version;
+pub use self::protocol_version::*;
 
 mod reliability_kind;
 pub use self::reliability_kind::*;

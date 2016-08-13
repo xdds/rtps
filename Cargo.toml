@@ -9,6 +9,7 @@ authors = ["Xavier Lange <xrlange@gmail.com>"]
 "net2" = "*"
 "serde" = "*"
 "serde_json" = "*"
+"clippy" = "*"
 
 
 # [[bin]]

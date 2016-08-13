@@ -3,41 +3,37 @@
 /// Behavior statemachine found in formal-14-09-01
 
 use super::super::super::common_types::*;
-use super::super::{ EntityTrait, EndpointTrait, HistoryCache };
+use super::super::{EntityTrait, EndpointTrait, WriterTrait, HistoryCache, HistoryCacheTrait};
+use super::WriterInitArgs;
 
 pub struct StatelessWriter {
-    pub guid: Guid,
-    pub unicast_locator_list: LocatorList,
-    pub multicast_locator_list: LocatorList,
-    pub reliability_level: ReliabilityKind,
-    pub topic_kind: TopicKind,
-    pub push_mode: bool,
-    pub heartbeat_period: Duration,
-    pub nack_response_delay: Duration,
-    pub nack_suppression_duration: Duration,
-    pub last_change_sequence_number: SequenceNumber,
-    pub writer_cache: HistoryCache,
-    _secret: (),
+    guid: Guid,
+    unicast_locator_list: LocatorList,
+    multicast_locator_list: LocatorList,
+    reliability_level: ReliabilityKind,
+    topic_kind: TopicKind,
+    push_mode: bool,
+    heartbeat_period: Duration,
+    nack_response_delay: Duration,
+    nack_suppression_duration: Duration,
+    last_change_sequence_number: SequenceNumber,
+    writer_cache: HistoryCache,
 }
 
 impl StatelessWriter {
-    fn new(guid: Guid, unicast_locator_list: LocatorList, multicast_locator_list: LocatorList,
-           reliability_level: ReliabilityKind, topic_kind: TopicKind, push_mode: bool,
-           heartbeat_period: Duration, nack_response_delay: Duration,
-           nack_suppression_duration: Duration) -> Self {
+    fn new(init_args: WriterInitArgs) -> Self {
         StatelessWriter {
-            guid: guid,
-            unicast_locator_list: unicast_locator_list,
-            multicast_locator_list: multicast_locator_list,
-            reliability_level: reliability_level,
-            topic_kind: topic_kind,
-            push_mode: push_mode,
-            heartbeat_period: heartbeat_period,
-            nack_response_delay: nack_response_delay,
-            nack_suppression_duration: nack_suppression_duration,
+            guid: init_args.guid,
+            unicast_locator_list: init_args.unicast_locator_list,
+            multicast_locator_list: init_args.multicast_locator_list,
+            reliability_level: init_args.reliability_level,
+            topic_kind: init_args.topic_kind,
+            push_mode: init_args.push_mode,
+            heartbeat_period: init_args.heartbeat_period,
+            nack_response_delay: init_args.nack_response_delay,
+            nack_suppression_duration: init_args.nack_suppression_duration,
             last_change_sequence_number: 0,
             writer_cache: HistoryCache::new(),
-            _secret: ()
         }
     }
 
@@ -56,10 +52,6 @@ impl StatelessWriter {
     fn nack_suppression_duration(&self) -> Duration {
         self.nack_response_delay
     }
-
-    fn new_change(&self, change: ChangeKind, handle: InstanceHandle, data: Vec<u8>) {
-        self.writer_cache.add(change, handle, data)
-    }
 }
 
 impl EntityTrait for StatelessWriter {
@@ -69,16 +61,27 @@ impl EntityTrait for StatelessWriter {
 }
 
 impl EndpointTrait for StatelessWriter {
-    fn topic_kind(&self) -> TopicKind {
-        self.topic_kind
-    }
     fn reliability_level(&self) -> ReliabilityKind {
         self.reliability_level
     }
+
+    fn topic_kind(&self) -> TopicKind {
+        self.topic_kind
+    }
+
     fn unicast_locator_list(&self) -> &LocatorList {
         &self.unicast_locator_list
     }
+
     fn multicast_locator_list(&self) -> &LocatorList {
         &self.multicast_locator_list
+    }
+}
+
+impl WriterTrait for StatelessWriter {
+    fn new_change(&mut self, kind: ChangeKind, handle: InstanceHandle, data: Vec<u8>) -> CacheChange {
+        self.last_change_sequence_number += 1;
+
+        CacheChange::new(kind, self.guid, handle, self.last_change_sequence_number, data)
     }
 }

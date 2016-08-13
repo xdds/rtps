@@ -2,6 +2,9 @@
 // #![feature(custom_derive)]
 // #![feature(rustc_private)]
 
+#![feature(plugin)]
+#![plugin(clippy)]
+
 //#[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;
 extern crate serde;

@@ -1,19 +1,43 @@
+use std::default::Default;
+
 use super::super::common_types::*;
+use super::{ HistoryCacheTrait, HistoryCacheResult };
 
-pub type Change = ();
-
+#[derive(Default)]
 pub struct HistoryCache {
-    changes: Vec<Change>
+    changes: Vec<CacheChange>
 }
 
-impl HistoryCache {
-    pub fn new() -> Self {
-        HistoryCache {
-            changes: vec![]
-        }
+impl HistoryCacheTrait for HistoryCache {
+    fn new() -> Self {
+        Default::default()
     }
 
-    pub fn add(&self, _: ChangeKind, _: InstanceHandle, _: Vec<u8>) {
+    fn add_change(&mut self, change: CacheChange) -> HistoryCacheResult {
+        self.changes.push(change);
+        Ok(())
+    }
+
+    fn remove_change(&mut self, change: CacheChange) -> HistoryCacheResult {
+        for c in &self.changes {
+            if *c == change {
+
+            }
+        }
+
         unimplemented!()
     }
+
+    fn get_change() {
+
+    }
+
+    fn get_seq_num_min() {
+
+    }
+
+    fn get_seq_num_max() {
+
+    }
+
 }
