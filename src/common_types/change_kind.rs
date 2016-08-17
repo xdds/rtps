@@ -1,5 +1,5 @@
 #[allow(non_camel_case_types)]
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum ChangeKind {
     ALIVE,
     NOT_ALIVE_DISPOSED,

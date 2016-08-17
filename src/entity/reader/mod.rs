@@ -9,7 +9,7 @@ pub struct Reader {
 impl Reader {
     pub fn new() -> Self {
         Reader {
-            guid: [0; 16]
+            guid: Guid::new()
         }
     }
 }

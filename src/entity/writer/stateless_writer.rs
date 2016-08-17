@@ -82,6 +82,6 @@ impl WriterTrait for StatelessWriter {
     fn new_change(&mut self, kind: ChangeKind, handle: InstanceHandle, data: Vec<u8>) -> CacheChange {
         self.last_change_sequence_number += 1;
 
-        CacheChange::new(kind, self.guid, handle, self.last_change_sequence_number, data)
+        CacheChange::new(kind, self.guid, handle, self.last_change_sequence_number, &data)
     }
 }

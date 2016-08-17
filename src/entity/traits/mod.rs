@@ -1,5 +1,3 @@
-pub use super::super::common_types;
-
 mod endpoint_trait;
 pub use self::endpoint_trait::*;
 

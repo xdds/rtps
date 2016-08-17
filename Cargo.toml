@@ -3,6 +3,9 @@ name = "rtps"
 version = "0.1.0"
 authors = ["Xavier Lange <xrlange@gmail.com>"]
 
+[lib]
+doctest = false
+
 [dependencies]
 "byteorder" = "*"
 "bitflags" = "*"
@@ -15,3 +18,7 @@ authors = ["Xavier Lange <xrlange@gmail.com>"]
 # [[bin]]
 # name = "multicast"
 # src = "src/bin/multicast.rs"
+
+[[test]]
+name = "test"
+path = "test/mod.rs"
