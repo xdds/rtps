@@ -8,6 +8,14 @@ pub use self::content::*;
 mod traits;
 pub use self::traits::*;
 
+pub use super::common_types::*;
+
+pub struct Submessage {
+    pub id: SubmessageId,
+    pub endianness: CdrEndianness,
+    pub buf: RcBuffer
+}
+
 #[allow(non_camel_case_types)]
 pub enum SubmessageId {
     PAD,
@@ -59,23 +67,22 @@ bitflags! {
     }
 }
 
-pub struct Submessage(pub SubmessageId, pub CdrEndianness, pub Vec<u8>);
-
 impl Serialize for Submessage {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {
         // Write the submessage id
-        try!(self.0.serialize(serializer));
+        try!(self.id.serialize(serializer));
 
         // Write the submessage flags (aka, the endianness)
-        let flags : u8 = match self.1 {
+        let flags : u8 = match self.endianness {
             CdrEndianness::Little => 1,
             CdrEndianness::Big => 0
         };
         try!(serializer.serialize_u8(flags));
 
-        // Write all the submessages
-        let iter = self.2.iter();
-        let visitor = SeqIteratorVisitor::new(iter, Some(self.2.len()));
+        // Write all the bytes
+        let borrowed_buf : &[u8] = self.buf.buf();
+        let iter = borrowed_buf.iter();
+        let visitor = SeqIteratorVisitor::new(iter, Some(borrowed_buf.len()));
 
         serializer.serialize_seq(visitor)
     }

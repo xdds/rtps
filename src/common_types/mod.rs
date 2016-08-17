@@ -37,6 +37,9 @@ pub use self::parameter_list::*;
 mod protocol_version;
 pub use self::protocol_version::*;
 
+mod rc_buffer;
+pub use self::rc_buffer::*;
+
 mod reliability_kind;
 pub use self::reliability_kind::*;
 

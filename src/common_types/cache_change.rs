@@ -1,13 +1,12 @@
 use super::*;
 
-// TODO: gotta figure out how to manage CacheChange.data
 #[derive(Clone,Debug)]
 pub struct CacheChange {
     kind: ChangeKind,
     writer_guid: Guid,
     instance_handle: InstanceHandle,
     sequence_number: SequenceNumber,
-    data: Vec<u8>
+    data: RcBuffer
 }
 
 impl PartialEq for CacheChange {
@@ -21,13 +20,13 @@ impl PartialEq for CacheChange {
 
 impl CacheChange {
     pub fn new(kind: ChangeKind, writer_guid: Guid, instance_handle: InstanceHandle,
-           sequence_number: SequenceNumber, data: &[u8]) -> Self {
+           sequence_number: SequenceNumber, data: RcBuffer) -> Self {
         CacheChange {
             kind: kind,
             writer_guid: writer_guid,
             instance_handle: instance_handle,
             sequence_number: sequence_number,
-            data: data.to_owned(),
+            data: data.clone(),
         }
     }
 
