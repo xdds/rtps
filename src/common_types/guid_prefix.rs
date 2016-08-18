@@ -1,1 +1,0 @@
-pub type GuidPrefix = [u8; 8];

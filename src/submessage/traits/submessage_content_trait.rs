@@ -4,6 +4,7 @@ pub use super::super::SubmessageFlags;
 
 pub trait SubmessageContent {
     fn submessage_id() -> SubmessageId;
-    fn flags() -> SubmessageFlags;
-    fn len() -> u16;
+    fn flags(&self) -> SubmessageFlags;
+    fn len(&self) -> u16;
+    fn valid(&self) -> bool;
 }

@@ -5,6 +5,7 @@
 use super::super::super::common_types::*;
 use super::super::{EntityTrait, EndpointTrait, WriterTrait, HistoryCache, HistoryCacheTrait};
 use super::WriterInitArgs;
+use super::super::super::message::Heartbeat;
 
 pub struct StatelessWriter {
     guid: Guid,
@@ -18,10 +19,12 @@ pub struct StatelessWriter {
     nack_suppression_duration: Duration,
     last_change_sequence_number: SequenceNumber,
     writer_cache: HistoryCache,
+
+    heartbeat_count: u32,
 }
 
 impl StatelessWriter {
-    fn new(init_args: WriterInitArgs) -> Self {
+    pub fn new(init_args: WriterInitArgs) -> Self {
         StatelessWriter {
             guid: init_args.guid,
             unicast_locator_list: init_args.unicast_locator_list,
@@ -32,8 +35,10 @@ impl StatelessWriter {
             heartbeat_period: init_args.heartbeat_period,
             nack_response_delay: init_args.nack_response_delay,
             nack_suppression_duration: init_args.nack_suppression_duration,
-            last_change_sequence_number: 0,
             writer_cache: HistoryCache::new(),
+
+            last_change_sequence_number: 0,
+            heartbeat_count: 0
         }
     }
 
@@ -51,6 +56,26 @@ impl StatelessWriter {
 
     fn nack_suppression_duration(&self) -> Duration {
         self.nack_response_delay
+    }
+
+    pub fn heartbeat(&mut self, reader_id: EntityId) -> Heartbeat {
+        let max = self.writer_cache.get_seq_num_max().unwrap_or(0);
+        let min = self.writer_cache.get_seq_num_min().unwrap_or(0);
+
+        let heartbeat = Heartbeat {
+            is_key: false,
+            reader_id: reader_id,
+            writer_id: self.guid.entity_id,
+
+            first_sn: min,
+            last_sn: max,
+
+            count: self.heartbeat_count
+        };
+
+        self.heartbeat_count += 1;
+
+        heartbeat
     }
 }
 
@@ -82,6 +107,8 @@ impl WriterTrait for StatelessWriter {
     fn new_change(&mut self, kind: ChangeKind, handle: InstanceHandle, data: RcBuffer) -> CacheChange {
         self.last_change_sequence_number += 1;
 
-        CacheChange::new(kind, self.guid, handle, self.last_change_sequence_number, data)
+        let change = CacheChange::new(kind, self.guid, handle, self.last_change_sequence_number, data);
+        self.writer_cache.add_change(&change).unwrap();
+        change
     }
 }

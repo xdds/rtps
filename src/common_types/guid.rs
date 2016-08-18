@@ -1,13 +1,22 @@
+use common_types::entity_id::EntityId;
+
+pub type GuidPrefix = [u8; 12];
+
 #[derive(Default, Debug, PartialEq, Copy, Clone)]
 pub struct Guid {
-    guid: [u8; 16]
+    pub guid_prefix: GuidPrefix,
+    pub entity_id: EntityId
 }
 
 
 impl Guid {
     pub fn new() -> Self {
         Guid {
-            guid: [0; 16]
+            guid_prefix: [0; 12],
+            entity_id: EntityId {
+                entity_key: [0; 3],
+                entity_kind: 0
+            }
         }
     }
 }

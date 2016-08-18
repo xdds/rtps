@@ -5,7 +5,7 @@ use serde::ser::{ Serialize, Serializer };
 use serde::ser::impls::SeqIteratorVisitor;
 use byteorder::{ ByteOrder, LittleEndian };
 
-use submessage::*;
+pub use submessage::*;
 
 pub struct Message {
     submessages: Vec<Submessage>

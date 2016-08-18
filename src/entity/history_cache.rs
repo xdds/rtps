@@ -1,4 +1,5 @@
 use std::default::Default;
+use std::slice::Iter;
 
 use super::super::common_types::*;
 use super::{ HistoryCacheTrait, HistoryCacheResult };
@@ -32,7 +33,7 @@ impl HistoryCacheTrait for HistoryCache {
 
         match index {
             Some(i) => {
-                self.changes.swap_remove(i);
+                self.changes.remove(i);
                 Ok(())
             },
             None => Err(NOT_FOUND_ERR)
@@ -53,5 +54,9 @@ impl HistoryCacheTrait for HistoryCache {
             Some(c) => Some(c.sequence_number()),
             None => None
         }
+    }
+
+    fn iter(&self) -> Iter<CacheChange> {
+        self.changes.iter()
     }
 }

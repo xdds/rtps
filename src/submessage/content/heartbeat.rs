@@ -1,6 +1,7 @@
 use common_types::*;
 use super::super::{SubmessageContent,SubmessageId,SubmessageFlags};
 
+#[derive(Debug)]
 pub struct Heartbeat {
     pub is_key: bool,
 
@@ -18,11 +19,15 @@ impl SubmessageContent for Heartbeat {
         unimplemented!()
     }
 
-    fn flags() -> SubmessageFlags {
+    fn flags(&self) -> SubmessageFlags {
         unimplemented!()
     }
 
-    fn len() -> u16 {
+    fn len(&self) -> u16 {
+        unimplemented!()
+    }
+
+    fn valid(&self) -> bool {
         unimplemented!()
     }
 }

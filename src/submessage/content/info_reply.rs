@@ -11,11 +11,15 @@ impl SubmessageContent for InfoReply {
         unimplemented!()
     }
 
-    fn flags() -> SubmessageFlags {
+    fn flags(&self) -> SubmessageFlags {
         unimplemented!()
     }
 
-    fn len() -> u16 {
+    fn len(&self) -> u16 {
+        unimplemented!()
+    }
+
+    fn valid(&self) -> bool {
         unimplemented!()
     }
 }

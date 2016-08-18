@@ -4,6 +4,7 @@
 
 #![feature(plugin)]
 #![plugin(clippy)]
+#![allow(len_without_is_empty)]
 
 //#[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;

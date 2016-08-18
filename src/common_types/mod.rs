@@ -22,9 +22,6 @@ pub use self::fragment_number_set::*;
 mod guid;
 pub use self::guid::*;
 
-mod guid_prefix;
-pub use self::guid_prefix::*;
-
 mod instance_handle;
 pub use self::instance_handle::*;
 
