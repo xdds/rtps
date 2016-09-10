@@ -1,7 +1,7 @@
 use common_types::*;
 use super::super::{SubmessageContent,SubmessageId,SubmessageFlags};
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub struct Heartbeat {
     pub is_key: bool,
 

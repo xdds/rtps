@@ -17,9 +17,9 @@ pub struct StatelessWriter {
     heartbeat_period: Duration,
     nack_response_delay: Duration,
     nack_suppression_duration: Duration,
-    last_change_sequence_number: SequenceNumber,
     writer_cache: HistoryCache,
 
+    last_change_sequence_number: SequenceNumber,
     heartbeat_count: u32,
 }
 
@@ -35,6 +35,7 @@ impl StatelessWriter {
             heartbeat_period: init_args.heartbeat_period,
             nack_response_delay: init_args.nack_response_delay,
             nack_suppression_duration: init_args.nack_suppression_duration,
+
             writer_cache: HistoryCache::new(),
 
             last_change_sequence_number: 0,

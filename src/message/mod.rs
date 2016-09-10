@@ -1,8 +1,6 @@
-pub mod types;
 pub mod header;
 
 use serde::ser::{ Serialize, Serializer };
-use serde::ser::impls::SeqIteratorVisitor;
 use byteorder::{ ByteOrder, LittleEndian };
 
 pub use submessage::*;
@@ -22,8 +20,11 @@ impl Serialize for Message {
         try!(serializer.serialize_u16(LittleEndian::read_u16(&VERSION_BYTES)));
         try!(serializer.serialize_u16(LittleEndian::read_u16(&VENDOR_ID)));
 
-
-        let visitor = SeqIteratorVisitor::new(self.submessages.iter(), Some(self.submessages.len()));
-        serializer.serialize_seq(visitor)
+        let mut state = try!( serializer.serialize_seq( Some(self.submessages.len()) ) );
+        for subm in &self.submessages {
+            try!(serializer.serialize_seq_elt(&mut state, subm));
+        }
+        serializer.serialize_seq_end(state)
     }
+
 }

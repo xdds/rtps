@@ -1,4 +1,5 @@
 use rtps::cdr::{CdrSerializer,CdrEndianness};
+use rtps::common_types::*;
 use rtps::submessage::*;
 use serde::ser::Serialize;
 

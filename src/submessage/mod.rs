@@ -1,6 +1,5 @@
 use cdr::CdrEndianness;
 use serde::ser::{ Serialize, Serializer };
-use serde::ser::impls::SeqIteratorVisitor;
 
 mod content;
 pub use self::content::*;
@@ -8,7 +7,7 @@ pub use self::content::*;
 mod traits;
 pub use self::traits::*;
 
-pub use super::common_types::*;
+use super::common_types::*;
 
 pub struct Submessage {
     pub id: SubmessageId,
@@ -81,9 +80,6 @@ impl Serialize for Submessage {
 
         // Write all the bytes
         let borrowed_buf : &[u8] = self.buf.buf();
-        let iter = borrowed_buf.iter();
-        let visitor = SeqIteratorVisitor::new(iter, Some(borrowed_buf.len()));
-
-        serializer.serialize_seq(visitor)
+        serializer.serialize_bytes(borrowed_buf)
     }
 }
