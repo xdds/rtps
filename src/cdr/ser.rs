@@ -202,20 +202,20 @@ impl<W: Write> Serializer for CdrSerializer<W> {
         value.serialize(self)
     }
 
-    fn serialize_seq_end(&mut self, state: Self::SeqState) -> Result<(), Self::Error> {
+    fn serialize_seq_end(&mut self, _: Self::SeqState) -> Result<(), Self::Error> {
         unimplemented!();
     }
 
     fn serialize_map(&mut self, _: Option<usize>) -> Result<(), Self::Error> {
         unimplemented!();
     }
-    fn serialize_map_key<T: Serialize>(&mut self, state: &mut Self::MapState, key: T) -> Result<(), Self::Error> {
+    fn serialize_map_key<T: Serialize>(&mut self, _: &mut Self::MapState, _: T) -> Result<(), Self::Error> {
         unimplemented!();
     }
-    fn serialize_map_value<T: Serialize>(&mut self, state: &mut Self::MapState, value: T) -> Result<(), Self::Error> {
+    fn serialize_map_value<T: Serialize>(&mut self, _: &mut Self::MapState, _: T) -> Result<(), Self::Error> {
         unimplemented!();
     }
-    fn serialize_map_end(&mut self, state: Self::MapState) -> Result<(), Self::Error> {
+    fn serialize_map_end(&mut self, _: Self::MapState) -> Result<(), Self::Error> {
         unimplemented!();
     }
 
@@ -223,54 +223,57 @@ impl<W: Write> Serializer for CdrSerializer<W> {
         unimplemented!();
     }
 
-    fn serialize_bytes(&mut self, _: &[u8]) -> Result<(), Self::Error> {
+    fn serialize_bytes(&mut self, buf: &[u8]) -> Result<(), Self::Error> {
+        match self.write_handle.write_all(buf) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(CdrError{ reason: "Stuff".to_string() })
+        }
+    }
+
+    fn serialize_tuple(&mut self, _: usize) -> Result<Self::TupleState, Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_elt<T: Serialize>(&mut self, _: &mut Self::TupleState, _: T) -> Result<(), Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_end(&mut self, _: Self::TupleState) -> Result<(), Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_struct(&mut self, _: &'static str, _: usize) -> Result<Self::TupleStructState, Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_struct_elt<T: Serialize>(&mut self, _: &mut Self::TupleStructState, _: T) -> Result<(), Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_struct_end(&mut self, _: Self::TupleStructState) -> Result<(), Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_variant(&mut self, _: &'static str, _: usize, _: &'static str, _: usize) -> Result<Self::TupleVariantState, Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_variant_elt<T: Serialize>(&mut self, _: &mut Self::TupleVariantState, _: T) -> Result<(), Self::Error> {
+        unimplemented!();
+    }
+    fn serialize_tuple_variant_end(&mut self, _: Self::TupleVariantState) -> Result<(), Self::Error> {
         unimplemented!();
     }
 
-    fn serialize_tuple(&mut self, len: usize) -> Result<Self::TupleState, Self::Error> {
+    fn serialize_struct(&mut self, _: &'static str, _: usize) -> Result<Self::StructState, Self::Error> {
         unimplemented!();
     }
-    fn serialize_tuple_elt<T: Serialize>(&mut self, state: &mut Self::TupleState, value: T) -> Result<(), Self::Error> {
+    fn serialize_struct_elt<V: Serialize>(&mut self, _: &mut Self::StructState, _: &'static str, _: V) -> Result<(), Self::Error> {
         unimplemented!();
     }
-    fn serialize_tuple_end(&mut self, state: Self::TupleState) -> Result<(), Self::Error> {
+    fn serialize_struct_end(&mut self, _: Self::StructState) -> Result<(), Self::Error> {
         unimplemented!();
     }
-    fn serialize_tuple_struct(&mut self, _: &'static str, len: usize) -> Result<Self::TupleStructState, Self::Error> {
+    fn serialize_struct_variant(&mut self, _: &'static str, _: usize, _: &'static str, _: usize) -> Result<Self::StructVariantState, Self::Error> {
         unimplemented!();
     }
-    fn serialize_tuple_struct_elt<T: Serialize>(&mut self, state: &mut Self::TupleStructState, value: T) -> Result<(), Self::Error> {
+    fn serialize_struct_variant_elt<V: Serialize>(&mut self, _: &mut Self::StructVariantState, _: &'static str, _: V) -> Result<(), Self::Error> {
         unimplemented!();
     }
-    fn serialize_tuple_struct_end(&mut self, state: Self::TupleStructState) -> Result<(), Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_tuple_variant(&mut self, _: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<Self::TupleVariantState, Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_tuple_variant_elt<T: Serialize>(&mut self, state: &mut Self::TupleVariantState, value: T) -> Result<(), Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_tuple_variant_end(&mut self, state: Self::TupleVariantState) -> Result<(), Self::Error> {
-        unimplemented!();
-    }
-
-    fn serialize_struct(&mut self, _: &'static str, len: usize) -> Result<Self::StructState, Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_struct_elt<V: Serialize>(&mut self, state: &mut Self::StructState, key: &'static str, value: V) -> Result<(), Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_struct_end(&mut self, state: Self::StructState) -> Result<(), Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_struct_variant(&mut self, _: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<Self::StructVariantState, Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_struct_variant_elt<V: Serialize>(&mut self, state: &mut Self::StructVariantState, key: &'static str, value: V) -> Result<(), Self::Error> {
-        unimplemented!();
-    }
-    fn serialize_struct_variant_end(&mut self, state: Self::StructVariantState) -> Result<(), Self::Error> {
+    fn serialize_struct_variant_end(&mut self, _: Self::StructVariantState) -> Result<(), Self::Error> {
         unimplemented!();
     }
 }
