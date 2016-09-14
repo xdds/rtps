@@ -2,6 +2,7 @@
 //#![feature(custom_derive)]
 //#![feature(rustc_private)]
 
+#![feature(type_ascription)]
 #![feature(plugin)]
 #![plugin(clippy)]
 #![allow(len_without_is_empty)]
@@ -24,5 +25,5 @@ pub mod submessage;
 // glob expose
 pub use cdr::*;
 pub use message::*;
-//pub use submessage::*;
+pub use submessage::*;
 pub use entity::*;

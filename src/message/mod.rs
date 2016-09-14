@@ -3,7 +3,7 @@ pub mod header;
 use serde::ser::{ Serialize, Serializer };
 use byteorder::{ ByteOrder, LittleEndian };
 
-pub use submessage::*;
+use submessage::*;
 
 pub struct Message {
     submessages: Vec<Submessage>
@@ -12,6 +12,13 @@ pub struct Message {
 const VERSION_BYTES : [u8; 2] = [10, 20];
 const VENDOR_ID : [u8; 2] = [19, 86];
 
+impl Message {
+    pub fn new(submessages: Vec<Submessage>) -> Self {
+        Message {
+            submessages: submessages
+        }
+    }
+}
 
 impl Serialize for Message {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {

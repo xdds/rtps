@@ -78,10 +78,7 @@ impl Serialize for Submessage {
         };
         try!(serializer.serialize_u8(flags));
 
-        let borrowed_buf : &[u8] = self.buf.buf();
-        // Write the len
-        try!(serializer.serialize_u32(borrowed_buf.len() as u32));
-        // Write all the bytes
-        serializer.serialize_bytes(borrowed_buf)
+        try!(serializer.serialize_u32(self.buf.len() as u32));
+        serializer.serialize_bytes(self.buf.buf())
     }
 }

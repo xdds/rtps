@@ -5,7 +5,7 @@
 use super::super::super::common_types::*;
 use super::super::{EntityTrait, EndpointTrait, WriterTrait, HistoryCache, HistoryCacheTrait};
 use super::WriterInitArgs;
-use super::super::super::message::Heartbeat;
+use super::super::super::submessage::Heartbeat;
 
 pub struct StatelessWriter {
     guid: Guid,

@@ -190,12 +190,15 @@ impl<W: Write> Serializer for CdrSerializer<W> {
         unimplemented!();
     }
 
-    fn serialize_seq(&mut self, _: Option<usize>) -> Result<(), Self::Error> {
-        unimplemented!();
+    fn serialize_seq(&mut self, seq_len: Option<usize>) -> Result<(), Self::Error> {
+        match seq_len {
+            Some(len) => self.serialize_u32(len as u32),
+            None => unimplemented!()
+        }
     }
 
-    fn serialize_seq_fixed_size(&mut self, _: usize) -> Result<(), Self::Error> {
-        unimplemented!();
+    fn serialize_seq_fixed_size(&mut self, len: usize) -> Result<(), Self::Error> {
+        self.serialize_u32(len as u32)
     }
 
     fn serialize_seq_elt<T>(&mut self, _: &mut Self::SeqState, value: T) -> Result<(), Self::Error> where T: Serialize {
@@ -203,7 +206,7 @@ impl<W: Write> Serializer for CdrSerializer<W> {
     }
 
     fn serialize_seq_end(&mut self, _: Self::SeqState) -> Result<(), Self::Error> {
-        unimplemented!();
+        Ok(())
     }
 
     fn serialize_map(&mut self, _: Option<usize>) -> Result<(), Self::Error> {

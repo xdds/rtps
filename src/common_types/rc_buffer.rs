@@ -15,4 +15,8 @@ impl RcBuffer {
         let borrow : &Vec<u8> = self.buf.borrow();
         borrow.borrow()
     }
+
+    pub fn len(&self) -> usize {
+        (self.buf.borrow() : &Vec<u8>).len()
+    }
 }
