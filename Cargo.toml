@@ -2,6 +2,7 @@
 name = "rtps"
 version = "0.1.0"
 authors = ["Xavier Lange <xrlange@gmail.com>"]
+license = "MIT"
 
 [lib]
 doctest = false
