@@ -3,17 +3,18 @@ name = "rtps"
 version = "0.1.0"
 authors = ["Xavier Lange <xrlange@gmail.com>"]
 license = "MIT"
+description = "OMG RTPS 2.2"
 
 [lib]
 doctest = false
 
 [dependencies]
-"byteorder" = "*"
-"bitflags" = "*"
-"net2" = "*"
-"serde" = "*"
-"serde_json" = "*"
+"bitflags" = "0.7.*"
+"byteorder" = "0.5.*"
 "clippy" = "0.0.89"
+"net2" = "0.2.*"
+"serde" = "0.8.*"
+"serde_json" = "0.8.*"
 
 [[test]]
 name = "test"
