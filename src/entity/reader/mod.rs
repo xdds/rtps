@@ -1,21 +1,6 @@
-use super::super::common_types::*;
-use super::EntityTrait;
+mod reader_init_args;
+pub use self::reader_init_args::*;
 
-#[derive(Default)]
-pub struct Reader {
-    guid: Guid,
-}
+mod stateless_reader;
+pub use self::stateless_reader::*;
 
-impl Reader {
-    pub fn new() -> Self {
-        Reader {
-            guid: Guid::new()
-        }
-    }
-}
-
-impl EntityTrait for Reader {
-    fn guid(&self) -> Guid {
-        self.guid
-    }
-}

@@ -10,5 +10,8 @@ pub use self::history_cache_trait::*;
 mod participant_trait;
 pub use self::participant_trait::*;
 
+mod reader;
+pub use self::reader::*;
+
 mod writer;
 pub use self::writer::*;

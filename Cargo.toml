@@ -14,11 +14,6 @@ doctest = false
 "serde_json" = "*"
 "clippy" = "*"
 
-
-# [[bin]]
-# name = "multicast"
-# src = "src/bin/multicast.rs"
-
 [[test]]
 name = "test"
 path = "test/mod.rs"
