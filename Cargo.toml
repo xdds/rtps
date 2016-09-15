@@ -12,7 +12,7 @@ doctest = false
 "net2" = "*"
 "serde" = "*"
 "serde_json" = "*"
-"clippy" = "*"
+"clippy" = "0.0.89"
 
 [[test]]
 name = "test"
