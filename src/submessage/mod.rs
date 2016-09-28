@@ -12,7 +12,7 @@ use super::common_types::*;
 pub struct Submessage {
     pub id: SubmessageId,
     pub endianness: CdrEndianness,
-    pub buf: RcBuffer
+    pub buf: ArcBuffer
 }
 
 #[allow(non_camel_case_types)]

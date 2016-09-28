@@ -1,14 +1,14 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use std::borrow::Borrow;
 
 #[derive(Debug, Clone)]
-pub struct RcBuffer {
-    buf: Rc<Vec<u8>>
+pub struct ArcBuffer {
+    buf: Arc<Vec<u8>>
 }
 
-impl RcBuffer {
+impl ArcBuffer {
     pub fn from_vec(vec: Vec<u8>) -> Self {
-        RcBuffer { buf: Rc::new(vec) }
+        ArcBuffer { buf: Arc::new(vec) }
     }
 
     pub fn buf(&self) -> &[u8] {

@@ -2,10 +2,19 @@
 /// Entity diagram found in formal-14-09-01 on manual page 71
 /// Behavior statemachine found in formal-14-09-01
 
+use serde::Serialize;
+
+use std::error::Error;
+use std::thread;
+use std::sync::atomic::{ Ordering };
+use std::io;
+use std::io::{ Cursor };
+
 use super::super::super::common_types::*;
-use super::super::{EntityTrait, EndpointTrait, WriterTrait, HistoryCache, HistoryCacheTrait};
-use super::WriterInitArgs;
-use super::super::super::submessage::Heartbeat;
+use super::super::*;
+use super::super::super::submessage::*;
+use super::super::super::message::*;
+use super::super::super::cdr::*;
 
 pub struct StatelessWriter {
     guid: Guid,
@@ -21,6 +30,8 @@ pub struct StatelessWriter {
 
     last_change_sequence_number: SequenceNumber,
     heartbeat_count: u32,
+
+    handle: Option<SpawnableTaskHandle>
 }
 
 impl StatelessWriter {
@@ -39,7 +50,9 @@ impl StatelessWriter {
             writer_cache: HistoryCache::new(),
 
             last_change_sequence_number: 0,
-            heartbeat_count: 0
+            heartbeat_count: 0,
+
+            handle: None
         }
     }
 
@@ -105,11 +118,67 @@ impl EndpointTrait for StatelessWriter {
 }
 
 impl WriterTrait for StatelessWriter {
-    fn new_change(&mut self, kind: ChangeKind, handle: InstanceHandle, data: RcBuffer) -> CacheChange {
+    fn new_change(&mut self, kind: ChangeKind, handle: InstanceHandle, data: ArcBuffer) -> CacheChange {
         self.last_change_sequence_number += 1;
 
         let change = CacheChange::new(kind, self.guid, handle, self.last_change_sequence_number, data);
         self.writer_cache.add_change(&change).unwrap();
         change
+    }
+}
+
+impl SpawnableTaskTrait for StatelessWriter {
+    fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
+        for change in self.writer_cache.iter() {
+            let position = {
+                let new_slice = &mut buf[..];
+                let writeable_buf = Cursor::new(new_slice);
+
+                let mut serializer = CdrSerializer {
+                    endianness: CdrEndianness::Big,
+                    write_handle: writeable_buf
+                };
+
+                let message = Message::new(vec![
+                    change.to_submessage()
+                ]);
+                // need control flow to create my non-io::Error stuff.
+                match message.serialize(&mut serializer) {
+                    Ok(_) => (),
+                    Err(err) => {
+                        return Err(io::Error::new(io::ErrorKind::Other, err.description()))
+                    },
+                }
+
+                serializer.write_handle.position() as usize
+            };
+
+            let used_buf : &[u8] = &buf[0..position];
+
+            for location in &mut self.unicast_locator_list {
+                try!(location.write(used_buf));
+            }
+
+        }
+
+        Ok(())
+    }
+
+    fn stop(&mut self) {
+        match self.handle {
+            Some(ref mut handle) => {
+                handle.stop_signal.store(true, Ordering::Relaxed);
+            },
+            None => unreachable!()
+        }
+    }
+
+    fn join(self) -> thread::Result<()> {
+        let can_join = self.handle.is_some();
+        if can_join {
+            self.handle.unwrap().join()
+        } else {
+            Err(Box::new("cannot join thread. never spawned."))
+        }
     }
 }

@@ -11,11 +11,11 @@ fn test_stateless_writer_heartbeat_increments_count() {
 
     writer.new_change(
         ChangeKind::ALIVE, InstanceHandle::new(),
-        RcBuffer::from_vec(vec![])
+        ArcBuffer::from_vec(vec![])
     );
     writer.new_change(
         ChangeKind::ALIVE, InstanceHandle::new(),
-        RcBuffer::from_vec(vec![])
+        ArcBuffer::from_vec(vec![])
     );
 
     let reader_entity_id : EntityId = Default::default();
@@ -35,7 +35,7 @@ fn test_stateless_writer_heartbeat_increments_count() {
         .. common_heartbeat
     });
 
-    let heartbeat2 =writer.heartbeat(reader_entity_id);
+    let heartbeat2 = writer.heartbeat(reader_entity_id);
     assert_eq!(heartbeat2, Heartbeat {
         count: 1,
         .. common_heartbeat

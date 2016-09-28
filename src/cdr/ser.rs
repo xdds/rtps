@@ -8,7 +8,6 @@ use byteorder::{LittleEndian, BigEndian, WriteBytesExt};
 
 use std::fmt::{ Display, Formatter };
 use std::fmt::Error as FmtError;
-//use std::io::Error as IOError;
 
 use std::io::Write;
 
@@ -51,6 +50,16 @@ pub struct CdrSerializer<W> where W: Write {
     pub endianness: CdrEndianness,
     pub write_handle: W
 }
+
+//pub trait Positionable {
+//    fn position(&self) -> usize;
+//}
+//
+//impl Positionable for CdrSerializer<Cursor> {
+//    fn position(&self) -> usize {
+//        100
+//    }
+//}
 
 impl<W: Write> Serializer for CdrSerializer<W> {
     type Error = CdrError;
@@ -229,7 +238,7 @@ impl<W: Write> Serializer for CdrSerializer<W> {
     fn serialize_bytes(&mut self, buf: &[u8]) -> Result<(), Self::Error> {
         match self.write_handle.write_all(buf) {
             Ok(_) => Ok(()),
-            Err(_) => Err(CdrError{ reason: "Stuff".to_string() })
+            Err(reason) => Err(CdrError{ reason: format!("serialize_bytes err {:?}", reason).to_string() })
         }
     }
 

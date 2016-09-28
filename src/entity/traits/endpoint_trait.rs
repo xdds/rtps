@@ -1,7 +1,8 @@
 use std::default::Default;
 use super::super::super::common_types::*;
+use super::super::traits::*;
 
-pub trait EndpointTrait {
+pub trait EndpointTrait : EntityTrait {
     fn topic_kind(&self) -> TopicKind;
 
     fn reliability_level(&self) -> ReliabilityKind {

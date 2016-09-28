@@ -10,8 +10,11 @@ pub use self::history_cache_trait::*;
 mod participant_trait;
 pub use self::participant_trait::*;
 
-mod reader;
-pub use self::reader::*;
+mod reader_trait;
+pub use self::reader_trait::*;
+
+mod spawnable_task_trait;
+pub use self::spawnable_task_trait::*;
 
 mod writer;
 pub use self::writer::*;

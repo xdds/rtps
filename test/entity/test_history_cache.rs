@@ -4,8 +4,8 @@ use rtps::*;
 #[test]
 fn test_history_cache() {
     let mut hc = HistoryCache::new();
-    let buf1 = RcBuffer::from_vec(vec![1,2,3]);
-    let buf2 = RcBuffer::from_vec(vec![3,4,5]);
+    let buf1 = ArcBuffer::from_vec(vec![1,2,3]);
+    let buf2 = ArcBuffer::from_vec(vec![3,4,5]);
 
     let cc1 = CacheChange::new(
         ChangeKind::ALIVE,

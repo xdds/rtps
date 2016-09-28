@@ -9,7 +9,7 @@ fn test_serialize() {
     let submessage = Submessage {
         id: SubmessageId::DATA,
         endianness: CdrEndianness::Little,
-        buf: RcBuffer::from_vec(vec![1,2,3,4])
+        buf: ArcBuffer::from_vec(vec![1,2,3,4])
     };
     let message = Message::new(vec![submessage]);
 
