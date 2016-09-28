@@ -10,7 +10,6 @@
 //#[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;
 extern crate serde;
-extern crate serde_json;
 extern crate byteorder;
 
 // mod only exposed

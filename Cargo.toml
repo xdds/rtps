@@ -11,10 +11,9 @@ doctest = false
 [dependencies]
 "bitflags" = "0.7.*"
 "byteorder" = "0.5.*"
-"clippy" = "0.0.89"
+"clippy" = "0.0.*"
 "net2" = "0.2.*"
 "serde" = "0.8.*"
-"serde_json" = "0.8.*"
 
 [[test]]
 name = "test"
