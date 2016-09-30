@@ -56,7 +56,8 @@ impl SpawnableTaskTrait for StatelessReader {
         let (read_size, _) = try!(socket.recv_from(buf));
         let usable_buf = &buf[0..read_size];
 
-        panic!("buf: {:?}", usable_buf.to_owned());
+//        panic!("buf: {:?}", usable_buf.to_owned());
+        Ok(())
     }
 
     fn stop(&mut self) {

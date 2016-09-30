@@ -9,13 +9,10 @@ pub use self::traits::*;
 
 use super::common_types::*;
 
-pub struct Submessage {
-    pub id: SubmessageId,
-    pub endianness: CdrEndianness,
-    pub buf: ArcBuffer
-}
+pub struct Submessage { pub id: SubmessageId, pub endianness: CdrEndianness, pub buf: ArcBuffer }
 
 #[allow(non_camel_case_types)]
+#[derive(Debug,PartialEq)]
 pub enum SubmessageId {
     PAD,
     ACKNACK,

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::borrow::Borrow;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArcBuffer {
     buf: Arc<Vec<u8>>
 }

@@ -11,7 +11,7 @@ use std::fmt::Error as FmtError;
 
 use std::io::Write;
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum CdrEndianness {
     Little,
     Big
