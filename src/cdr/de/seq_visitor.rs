@@ -12,8 +12,6 @@ impl<'a,T> CdrSeqVisitor<'a,T> where T: serde::Deserializer {
     }
 }
 
-static mut asdf : u32 = 0;
-
 impl<'a,R> serde::de::SeqVisitor for CdrSeqVisitor<'a,R> where R: serde::Deserializer {
     type Error = R::Error;
 

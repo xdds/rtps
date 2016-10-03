@@ -1,15 +1,23 @@
+// TODO: for a good time, comment this line and let rust point out all the extra stuff
 #![allow(dead_code)]
-//#![feature(custom_derive)]
-//#![feature(rustc_private)]
 
+
+#![feature(rustc_macro)]
 #![feature(type_ascription)]
+
+// Clippy specific settings
 #![feature(plugin)]
 #![plugin(clippy)]
 #![allow(len_without_is_empty)]
 
+// Serde specific settings
+extern crate serde;
+#[macro_use] extern crate serde_derive;
+
 //#[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;
-extern crate serde;
+
+
 extern crate byteorder;
 
 // mod only exposed

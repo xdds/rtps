@@ -160,20 +160,13 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
     }
 }
 
-#[derive(Deserialize,Debug,PartialEq)]
-pub struct Message {
-    junk: [u8; 4],
-    protocol_type: rtps::common_types::ProtocolVersion,
-    vendor_id: rtps::common_types::VendorId,
-    submessages: Vec<Submessage>
-}
-
-#[derive(Deserialize,Debug,PartialEq)]
-pub struct Submessage {
-    id: rtps::SubmessageId,
-    endianness: rtps::common_types::Endianness,
-    buf: rtps::common_types::ArcBuffer
-}
+//#[derive(Deserialize,Debug,PartialEq)]
+//pub struct Message {
+//    junk: [u8; 4],
+//    protocol_type: rtps::common_types::ProtocolVersion,
+//    vendor_id: rtps::common_types::VendorId,
+//    submessages: Vec<rtps::Submessage>
+//}
 
 #[test]
 fn bang() {
@@ -189,13 +182,13 @@ fn bang() {
     let mut cursor = Cursor::new(bytes);
 
     let mut de = CdrDeserializer::new(&mut cursor);
-    let message : Message = Deserialize::deserialize(&mut de).unwrap();
+    let message : rtps::Message = Deserialize::deserialize(&mut de).unwrap();
 
-    assert_eq!(message, Message {
+    assert_eq!(message, rtps::Message {
         junk: [82, 84, 80, 83],
         protocol_type: rtps::common_types::ProtocolVersion::VERSION_2_2,
         vendor_id: [86, 19],
-        submessages: vec![Submessage {
+        submessages: vec![rtps::Submessage {
             id: rtps::SubmessageId::DATA,
             endianness: rtps::common_types::Endianness::Little,
             buf: rtps::common_types::ArcBuffer::from_vec(vec![1,2,3,4])

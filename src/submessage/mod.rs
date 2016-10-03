@@ -1,6 +1,6 @@
 use serde::de::Error;
 
-use serde::ser::{ Serialize, Serializer };
+use serde::{ Serialize, Serializer };
 use serde;
 
 mod content;
@@ -11,7 +11,12 @@ pub use self::traits::*;
 
 use super::common_types::*;
 
-pub struct Submessage { pub id: SubmessageId, pub endianness: Endianness, pub buf: ArcBuffer }
+#[derive(Deserialize,Debug,PartialEq)]
+pub struct Submessage {
+    pub id: SubmessageId,
+    pub endianness: Endianness,
+    pub buf: ArcBuffer
+}
 
 #[allow(non_camel_case_types)]
 #[derive(Debug,PartialEq)]
