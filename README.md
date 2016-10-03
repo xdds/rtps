@@ -1,7 +1,9 @@
 RTPS Wire-protocol
 ======
 
-<img src="https://travis-ci.org/xdds/rtps.svg?branch=master">
+<a href="https://travis-ci.org/xdds/rtps">
+    <img src="https://travis-ci.org/xdds/rtps.svg?branch=master">
+</a>
 
 An implementation of the real-time publish subscribe wire protocol. Aims to implement the platform specific module for UDP/IP-based messaging.
 
