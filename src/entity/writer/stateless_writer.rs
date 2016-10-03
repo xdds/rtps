@@ -135,7 +135,7 @@ impl SpawnableTaskTrait for StatelessWriter {
                 let writeable_buf = Cursor::new(new_slice);
 
                 let mut serializer = CdrSerializer {
-                    endianness: CdrEndianness::Big,
+                    endianness: Endianness::Big,
                     write_handle: writeable_buf
                 };
 

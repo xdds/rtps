@@ -1,5 +1,4 @@
-use serde::ser::{Serialize, Serializer};
-//use serde_json;
+use serde::{ Serialize, Serializer };
 
 use serde::ser::Error as SerErr;
 use std::error::Error as Err;
@@ -11,11 +10,7 @@ use std::fmt::Error as FmtError;
 
 use std::io::Write;
 
-#[derive(Debug,PartialEq)]
-pub enum CdrEndianness {
-    Little,
-    Big
-}
+use super::super::common_types::Endianness;
 
 #[derive(Debug)]
 pub struct CdrError{
@@ -47,19 +42,9 @@ impl SerErr for CdrError {
 }
 
 pub struct CdrSerializer<W> where W: Write {
-    pub endianness: CdrEndianness,
+    pub endianness: Endianness,
     pub write_handle: W
 }
-
-//pub trait Positionable {
-//    fn position(&self) -> usize;
-//}
-//
-//impl Positionable for CdrSerializer<Cursor> {
-//    fn position(&self) -> usize {
-//        100
-//    }
-//}
 
 impl<W: Write> Serializer for CdrSerializer<W> {
     type Error = CdrError;
@@ -112,7 +97,7 @@ impl<W: Write> Serializer for CdrSerializer<W> {
 
     fn serialize_u16(&mut self, v:u16) -> Result<(), Self::Error> {
         match self.endianness {
-            CdrEndianness::Little => {
+            Endianness::Little => {
                 match self.write_handle.write_u16::<LittleEndian>(v) {
                     Ok(_) => Ok(()),
                     Err(err) => Err(CdrError{
@@ -120,7 +105,7 @@ impl<W: Write> Serializer for CdrSerializer<W> {
                     })
                 }
             },
-            CdrEndianness::Big => {
+            Endianness::Big => {
                 match self.write_handle.write_u16::<BigEndian>(v) {
                     Ok(_) => Ok(()),
                     Err(err) => Err(CdrError{
@@ -133,7 +118,7 @@ impl<W: Write> Serializer for CdrSerializer<W> {
 
     fn serialize_u32(&mut self, v:u32) -> Result<(), Self::Error> {
         match self.endianness {
-            CdrEndianness::Little => {
+            Endianness::Little => {
                 match self.write_handle.write_u32::<LittleEndian>(v) {
                     Ok(_) => Ok(()),
                     Err(_) => Err(CdrError{
@@ -141,7 +126,7 @@ impl<W: Write> Serializer for CdrSerializer<W> {
                     })
                 }
             },
-            CdrEndianness::Big => {
+            Endianness::Big => {
                 match self.write_handle.write_u32::<BigEndian>(v) {
                     Ok(_) => Ok(()),
                     Err(_) => Err(CdrError{

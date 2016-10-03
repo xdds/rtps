@@ -10,6 +10,9 @@ pub use self::count::*;
 mod duration;
 pub use self::duration::*;
 
+mod endianness;
+pub use self::endianness::*;
+
 mod entity_id;
 pub use self::entity_id::*;
 

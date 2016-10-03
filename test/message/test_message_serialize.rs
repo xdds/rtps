@@ -1,4 +1,4 @@
-use rtps::cdr::{CdrSerializer,CdrEndianness};
+use rtps::cdr::{CdrSerializer};
 use rtps::common_types::*;
 use rtps::message::*;
 use rtps::submessage::*;
@@ -8,14 +8,14 @@ use serde::ser::Serialize;
 fn test_serialize() {
     let submessage = Submessage {
         id: SubmessageId::DATA,
-        endianness: CdrEndianness::Little,
+        endianness: Endianness::Little,
         buf: ArcBuffer::from_vec(vec![1,2,3,4])
     };
     let message = Message::new(vec![submessage]);
 
     let buf : Vec<u8> = vec![];
     let mut serializer = CdrSerializer{
-        endianness: CdrEndianness::Big,
+        endianness: Endianness::Big,
         write_handle: buf
     };
     message.serialize(&mut serializer).unwrap();

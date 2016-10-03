@@ -171,8 +171,8 @@ pub struct Message {
 #[derive(Deserialize,Debug,PartialEq)]
 pub struct Submessage {
     id: rtps::SubmessageId,
-//    endianness: rtps::CdrEndianness,
-//    buf: rtps::common_types::ArcBuffer
+    endianness: rtps::common_types::Endianness,
+    buf: rtps::common_types::ArcBuffer
 }
 
 #[test]
@@ -182,7 +182,7 @@ fn bang() {
         20, 10, // Protocol Version
         86, 19, // Vendor id
         0, 0, 0, 1, // Submessage count
-        21, 1, // Submessage 0 headers
+        21, 1, // Submessage 0 message id, endianness flag
         0, 0, 0, 4, // Submessage 0 len
         1, 2, 3, 4  // Submessage 0 data
     ];
@@ -196,7 +196,9 @@ fn bang() {
         protocol_type: rtps::common_types::ProtocolVersion::VERSION_2_2,
         vendor_id: [86, 19],
         submessages: vec![Submessage {
-            id: rtps::SubmessageId::DATA
+            id: rtps::SubmessageId::DATA,
+            endianness: rtps::common_types::Endianness::Little,
+            buf: rtps::common_types::ArcBuffer::from_vec(vec![1,2,3,4])
         }],
     });
 }

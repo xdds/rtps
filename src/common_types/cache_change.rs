@@ -1,5 +1,5 @@
 use super::*;
-use super::super::{ CdrEndianness, Submessage, SubmessageId };
+use super::super::{ Submessage, SubmessageId };
 
 #[derive(Clone,Debug)]
 pub struct CacheChange {
@@ -38,7 +38,7 @@ impl CacheChange {
     pub fn to_submessage(&self) -> Submessage {
         Submessage {
             id: SubmessageId::DATA,
-            endianness: CdrEndianness::Little,
+            endianness: Endianness::Little,
             buf: self.data.clone(),
         }
     }

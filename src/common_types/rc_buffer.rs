@@ -1,3 +1,5 @@
+use serde;
+
 use std::sync::Arc;
 use std::borrow::Borrow;
 
@@ -18,5 +20,12 @@ impl ArcBuffer {
 
     pub fn len(&self) -> usize {
         (self.buf.borrow() : &Vec<u8>).len()
+    }
+}
+
+impl serde::Deserialize for ArcBuffer {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
+        let data : Vec<u8> = try!(serde::Deserialize::deserialize(deserializer));
+        Ok(ArcBuffer::from_vec(data))
     }
 }

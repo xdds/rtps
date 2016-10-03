@@ -1,7 +1,5 @@
 use serde::de::Error;
 
-use cdr::{ CdrEndianness };
-
 use serde::ser::{ Serialize, Serializer };
 use serde;
 
@@ -13,7 +11,7 @@ pub use self::traits::*;
 
 use super::common_types::*;
 
-pub struct Submessage { pub id: SubmessageId, pub endianness: CdrEndianness, pub buf: ArcBuffer }
+pub struct Submessage { pub id: SubmessageId, pub endianness: Endianness, pub buf: ArcBuffer }
 
 #[allow(non_camel_case_types)]
 #[derive(Debug,PartialEq)]
@@ -99,8 +97,8 @@ impl Serialize for Submessage {
 
         // Write the submessage flags (aka, the endianness)
         let flags : u8 = match self.endianness {
-            CdrEndianness::Little => 1,
-            CdrEndianness::Big => 0
+            Endianness::Little => 1,
+            Endianness::Big => 0
         };
         try!(serializer.serialize_u8(flags));
 
