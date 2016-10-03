@@ -3,7 +3,6 @@ use std::fmt::Display;
 
 use serde;
 
-
 #[derive(Debug)]
 pub struct CdrDeserializerError {
     thing: String

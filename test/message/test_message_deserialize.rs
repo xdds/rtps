@@ -2,6 +2,9 @@ use serde;
 use serde::{ Deserialize };
 use std::io::{ Read, Cursor };
 
+use byteorder;
+use byteorder::ByteOrder;
+
 use rtps;
 use rtps::cdr::CdrDeserializerError;
 use rtps::cdr::CdrSeqVisitor;
@@ -42,8 +45,11 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
         unimplemented!()
     }
 
-    fn deserialize_u32<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        unimplemented!()
+    fn deserialize_u32<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let mut buf: [u8; 4] = [0; 4];
+        try!(self.data.read(&mut buf));
+        let val = byteorder::BigEndian::read_u32(&buf[..]);
+        visitor.visit_u32(val)
     }
 
     fn deserialize_u64<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
@@ -98,12 +104,17 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
         unimplemented!()
     }
 
-    fn deserialize_seq<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        unimplemented!()
+    fn deserialize_seq<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let mut buf: [u8; 4] = [0; 4];
+        try!(self.data.read(&mut buf));
+        let len = byteorder::BigEndian::read_u32(&buf[..]) as usize;
+
+        let seq_visitor = CdrSeqVisitor::new(self,len, true);
+        visitor.visit_seq(seq_visitor)
     }
 
-    fn deserialize_seq_fixed_size<V>(&mut self, _: usize, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        let seq_visitor = CdrSeqVisitor::new(self);
+    fn deserialize_seq_fixed_size<V>(&mut self, len: usize, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let seq_visitor = CdrSeqVisitor::new(self,len, false);
         visitor.visit_seq(seq_visitor)
     }
 
@@ -127,8 +138,8 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
         unimplemented!()
     }
 
-    fn deserialize_struct<V>(&mut self, _: &'static str, _: &'static [&'static str], mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        let seq_visitor = CdrSeqVisitor::new(self);
+    fn deserialize_struct<V>(&mut self, _: &'static str, fields: &'static [&'static str], mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let seq_visitor = CdrSeqVisitor::new(self,fields.len(),false);
         visitor.visit_seq(seq_visitor)
     }
 
@@ -153,13 +164,13 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
 pub struct Message {
     junk: [u8; 4],
     protocol_type: rtps::common_types::ProtocolVersion,
-
-//    submessages: Vec<Submessage>
+    vendor_id: rtps::common_types::VendorId,
+    submessages: Vec<Submessage>
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Deserialize,Debug,PartialEq)]
 pub struct Submessage {
-//    id: rtps::SubmessageId,
+    id: rtps::SubmessageId,
 //    endianness: rtps::CdrEndianness,
 //    buf: rtps::common_types::ArcBuffer
 }
@@ -183,10 +194,9 @@ fn bang() {
     assert_eq!(message, Message {
         junk: [82, 84, 80, 83],
         protocol_type: rtps::common_types::ProtocolVersion::VERSION_2_2,
-//        submessages: vec![Submessage {
-//            id: rtps::SubmessageId::DATA,
-//            endianness: rtps::CdrEndianness::Little,
-//            buf: rtps::common_types::ArcBuffer::from_vec(vec![])
-//        }]
+        vendor_id: [86, 19],
+        submessages: vec![Submessage {
+            id: rtps::SubmessageId::DATA
+        }],
     });
 }

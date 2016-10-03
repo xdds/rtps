@@ -1,5 +1,9 @@
-use cdr::CdrEndianness;
+use serde::de::Error;
+
+use cdr::{ CdrEndianness };
+
 use serde::ser::{ Serialize, Serializer };
+use serde;
 
 mod content;
 pub use self::content::*;
@@ -47,6 +51,31 @@ impl Serialize for SubmessageId {
             SubmessageId::DATA_FRAG => 0x16, /* DataFrag */
         };
         serializer.serialize_u8(val)
+    }
+}
+
+impl serde::Deserialize for SubmessageId {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
+        let byte : u8 = try!(serde::Deserialize::deserialize(deserializer));
+        match byte {
+            0x01 => Ok(SubmessageId::PAD), /* Pad */
+            0x06 => Ok(SubmessageId::ACKNACK), /* AckNack */
+            0x07 => Ok(SubmessageId::HEARTBEAT), /* Heartbeat */
+            0x08 => Ok(SubmessageId::GAP), /* Gap */
+            0x09 => Ok(SubmessageId::INFO_TS), /* InfoTimestamp */
+            0x0c => Ok(SubmessageId::INFO_SRC), /* InfoSource */
+            0x0d => Ok(SubmessageId::INFO_REPLY_IP4), /* InfoReplyIp4 */
+            0x0e => Ok(SubmessageId::INFO_DST), /* InfoDestination */
+            0x0f => Ok(SubmessageId::INFO_REPLY), /* InfoReply */
+            0x12 => Ok(SubmessageId::NACK_FRAG), /* NackFrag */
+            0x13 => Ok(SubmessageId::HEARTBEAT_FRAG), /* HeartbeatFrag */
+            0x15 => Ok(SubmessageId::DATA), /* Data */
+            0x16 => Ok(SubmessageId::DATA_FRAG), /* DataFrag */
+            _ => {
+                Err(Error::custom(format!("unknown type {:?}", byte)))
+//                Err(CdrDeserializerError{ thing: format!("unknown type {:?}", byte) })
+            },
+        }
     }
 }
 
