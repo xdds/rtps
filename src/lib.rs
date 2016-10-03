@@ -30,7 +30,7 @@ pub mod message;
 pub mod submessage;
 
 // glob expose
-pub use cdr::*;
+//pub use cdr::*;
 pub use message::*;
 pub use submessage::*;
 pub use entity::*;
