@@ -31,5 +31,5 @@ fn deserialize_message() {
         }],
     });
     }
-    assert_eq!(cursor.position(), 0);
+    assert_eq!(cursor.position() as usize, bytes.len());
 }
