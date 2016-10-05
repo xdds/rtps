@@ -67,16 +67,29 @@ fn deserialize_submessage() {
             b: &[
                 0x12, 1, // Submessage 0 message id, endianness flag
                 0xDD, 0xEE, 0xAA, 0xDD, // Submessage 0 len
-                1, 2, 3, 4, // guid prefix first four
-                5, 6, 7, 8, // guid prefix second four
-                9, 10, 11, 12, // guid prefix locator port
+                0, 0, 0, 0xc4, // reader_id
+                0, 0, 0, 0xc3, // writer_id
+                0, 0, 0, 0, // writer_sn first 4
+                0, 0, 0, 5, // writer_sn second 4
+
+                0, 0, 0, 100, // fragment_number base
+                4, 3, 2, 1, // fragment_number bitset part 1
+                4, 3, 2, 1, // fragment_number bitset part 2
+                4, 3, 2, 1, // fragment_number bitset part 3
+                4, 3, 2, 1, // fragment_number bitset part 4
+                4, 3, 2, 1, // fragment_number bitset part 5
+                4, 3, 2, 1, // fragment_number bitset part 6
+                4, 3, 2, 1, // fragment_number bitset part 7
+                4, 3, 2, 1, // fragment_number bitset part 8
+
+                0, 0, 0, 5, // count
             ],
             e: rtps::SubmessageVariant::NackFrag {
-                reader_id: t::EntityId{ entity_key: [0,0,0], entity_kind: 0 },
-                writer_id: t::EntityId{ entity_key: [0,0,0], entity_kind: 0 },
-                writer_sn: 100,
-                fragment_number_state: t::FragmentNumberSet{ base: 100, set: [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,]},
-                count: 10,
+                reader_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInReader },
+                writer_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInWriter },
+                writer_sn: 5,
+                fragment_number_state: t::FragmentNumberSet{ base: 100, set: [4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1] },
+                count: 5,
             }
         }
     ];

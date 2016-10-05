@@ -19,9 +19,6 @@ pub use self::entity_id::*;
 mod fragment_number;
 pub use self::fragment_number::*;
 
-mod fragment_number_set;
-pub use self::fragment_number_set::*;
-
 mod guid;
 pub use self::guid::*;
 

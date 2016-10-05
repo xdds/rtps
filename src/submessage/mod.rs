@@ -1,5 +1,3 @@
-use serde::de::Error;
-
 use serde::{ Serialize, Serializer };
 use serde;
 
@@ -75,7 +73,7 @@ impl serde::Deserialize for SubmessageVariant {
                 Ok(SubmessageVariant::InfoDestination(try!(serde::Deserialize::deserialize(deserializer))))
             },
             SubmessageId::INFO_REPLY_IP4 => {
-                Err(Error::custom("we don't do ipv4 specialization yet"))
+                Err(serde::Error::custom("we don't do ipv4 specialization yet"))
 //                0x0f
             },
 
@@ -97,7 +95,7 @@ impl serde::Deserialize for SubmessageVariant {
 //            SubmessageId::DATA => 0x15, /* Data */
 //            SubmessageId::DATA_FRAG => 0x16, /* DataFrag */
             other => {
-                Err(Error::custom(format!("unsupported: {:?}", other)))
+                Err(serde::Error::custom(format!("unsupported: {:?}", other)))
             },
         }
     }
@@ -160,7 +158,7 @@ impl serde::Deserialize for SubmessageId {
             0x15 => Ok(SubmessageId::DATA), /* Data */
             0x16 => Ok(SubmessageId::DATA_FRAG), /* DataFrag */
             _ => {
-                Err(Error::custom(format!("unknown type {:?}", byte)))
+                Err(serde::Error::custom(format!("unknown type {:?}", byte)))
 //                Err(CdrDeserializerError{ thing: format!("unknown type {:?}", byte) })
             },
         }

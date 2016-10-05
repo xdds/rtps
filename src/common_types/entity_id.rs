@@ -1,5 +1,6 @@
 use serde;
 
+#[derive(Debug,Copy,Clone,PartialEq)]
 pub enum EntityKind {
     BuiltInUnknown, // 0xc0
     BuiltInParticipant, // 0xc1
@@ -13,6 +14,10 @@ pub enum EntityKind {
     UserWriter, // 0x03
     UserReader, // 0x04
     UserReaderWKey, // 0x07
+}
+
+impl Default for EntityKind {
+    fn default() -> Self { EntityKind::UserUnknown }
 }
 
 impl serde::Deserialize for EntityKind {
@@ -31,7 +36,7 @@ impl serde::Deserialize for EntityKind {
             0x04 => Ok(EntityKind::UserReader),
             0x07 => Ok(EntityKind::UserReaderWKey),
             _ => {
-                Err(Error::custom(format!("unknown entity kind {:?}", byte)))
+                Err(serde::Error::custom(format!("unknown entity kind 0x{:02X}", byte)))
                 //                Err(CdrDeserializerError{ thing: format!("unknown type {:?}", byte) })
             },
         }
@@ -41,6 +46,6 @@ impl serde::Deserialize for EntityKind {
 #[derive(Default, Debug, PartialEq, Copy, Clone, Deserialize)]
 pub struct EntityId {
     pub entity_key: [u8; 3],
-    pub entity_kind: u8,
+    pub entity_kind: EntityKind,
 }
 

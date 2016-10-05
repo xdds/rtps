@@ -1,24 +1,35 @@
 <!-- http://photofunia.com/results/57f5772f468679c3198b4568 -->
 <img src="https://github.com/xdds/rtps/raw/master/assets/logo-medium.jpg">
 
-RTPS Wire-protocol
-======
-
+Real Time Publish Subscribe
+====
 
 <a href="https://travis-ci.org/xdds/rtps">
     <img src="https://travis-ci.org/xdds/rtps.svg?branch=master">
 </a>
 
-An implementation of the real-time publish subscribe wire protocol. Aims to implement the platform specific module for UDP/IP-based messaging.
+A mature standard for building publish subscribe systems, with a unique emphasis on quality of service parameters and fast cross platform implementations.
 
-Find the spec here: [http://www.omg.org/spec/DDSI-RTPS/2.2/PDF/](http://www.omg.org/spec/DDSI-RTPS/2.2/PDF/)
+There are over 20 implementations of RTPS (well, of DDS, but RTPS underpins all those implementations). They range from FPGAs to C/C++/Java. This is the first Rust implementation.
 
-  - [ ] 9.4.4 Mapping of the RTPS Header
+Find the spec here: [http://www.omg.org/spec/DDSI-RTPS/2.2/PDF/](http://www.omg.org/spec/DDSI-RTPS/2.2/PDF/). It lacks in easy to read binary breakdown, but in general it does a good job of splitting format, purpose, and behavior. Unfortunately it does not read from beginning to end.
 
-TODO
-----
-
- - [ ] Serialize Message/Submessage
- - [ ] Deserialize Message/Submessage
+CDR:
+ - [x] Enough serialization/deserialization to get by
+ - [ ] Full serialization/deserialization for all CDR types
+RTPS:
+ - [x] Entity thread abstraction
+ - [ ] Basic entity thread stats
+ - [ ] Message serialization
+ - [ ] Submessage header serialization
+ - [ ] Submessage content serialization
  - [ ] UDP test client
- - [ ] Interop test with https://github.com/eProsima/Fast-RTPS
+ - [ ] Built in entities for DDS
+ - [ ] Interop test with [eProsima's modern, open-source C++ impl](https://github.com/eProsima/Fast-RTPS)
+
+Code of Conduct
+===
+
+Anyone who interacts with XDDS RTPS in any space including but not limited to this GitHub repository is expected to
+follow [our code of conduct](https://github.com/xdds/rtps/blob/master/CODE_OF_CONDUCT.md)
+

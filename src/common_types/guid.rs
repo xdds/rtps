@@ -1,4 +1,4 @@
-use common_types::entity_id::EntityId;
+use common_types::entity_id::*;
 
 pub type GuidPrefix = [u8; 12];
 
@@ -15,7 +15,7 @@ impl Guid {
             guid_prefix: [0; 12],
             entity_id: EntityId {
                 entity_key: [0; 3],
-                entity_kind: 0
+                entity_kind: EntityKind::UserUnknown
             }
         }
     }
