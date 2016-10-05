@@ -14,19 +14,28 @@ fn deserialize_submessage() {
     let test_cases = [
         TC {
             b: &[
-                0x0c, 1, // Submessage 0 message id, endianness flag
-                0, 0, 0, 4, // Submessage 0 len
-                0, 0, 1, 0  // Submessage 0 data
+                0x09, 1, // Submessage 0 message id, endianness flag
+                0, 0, 0, 8, // Submessage 0 len
+                0, 0, 1, 0, // Submessage 0 seconds
+                0, 0, 0, 1, // Submessage 0 fraction
             ],
-            e: rtps::SubmessageVariant::InfoTimestamp(t::Timestamp { seconds: 4, fraction: 256 })
+            e: rtps::SubmessageVariant::InfoTimestamp(t::Timestamp { seconds: 256, fraction: 1 })
         },
         TC {
             b: &[
-                0x09, 1, // Submessage 0 message id, endianness flag
-                0, 0, 0, 4, // Submessage 0 len
-                0, 0, 1, 0  // Submessage 0 data
+                0x0c, 1, // Submessage 0 message id, endianness flag
+                0, 0, 0, 16, // Submessage 0 len
+                20, 10, 1, 0,  // protocol version, vendor id
+                0xFF, 0xFF, 0xFF, 0xFF, // guid first 4
+                0x00, 0x00, 0x00, 0x00, // guid second 4
+                0xDD, 0xDD, 0xDD, 0xDD, // guid third 4
             ],
-            e: rtps::SubmessageVariant::InfoTimestamp(t::Timestamp { seconds: 4, fraction: 256 })
+            e: rtps::SubmessageVariant::InfoSource {
+                guid_prefix: [0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xDD, 0xDD, 0xDD, 0xDD],
+                protocol_version: t::ProtocolVersion::VERSION_2_2,
+                vendor_id: [1, 0],
+            }
+//                (t::Timestamp { seconds: 4, fraction: 256 })
         }
     ];
 

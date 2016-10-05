@@ -32,7 +32,7 @@ pub enum SubmessageVariant {
     // Interpreter Submessages
     InfoDestination{ guid_prefix: GuidPrefix },
     InfoReply{ unicast_locator_list: LocatorList /* , multicast_locator_list: Option<LocatorList> TODO: relies on presence of multicast flag above */ },
-    InfoSource{ protocol_verseion: ProtocolVersion, vendor_id: VendorId, guid_prefix: GuidPrefix},
+    InfoSource{ protocol_version: ProtocolVersion, vendor_id: VendorId, guid_prefix: GuidPrefix},
     InfoTimestamp(Timestamp),
 
     // Entity Submessages
@@ -50,6 +50,8 @@ impl serde::Deserialize for SubmessageVariant {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
         let kind : SubmessageId = try!(serde::Deserialize::deserialize(deserializer));
         let _ : u8 = try!(serde::Deserialize::deserialize(deserializer));
+        // len of message
+        let _ : u32 = try!(serde::Deserialize::deserialize(deserializer));
 
         match kind {
 //            SubmessageId::PAD => 0x01, /* Pad */
@@ -62,10 +64,10 @@ impl serde::Deserialize for SubmessageVariant {
             },
             SubmessageId::INFO_SRC => {
                 Ok(SubmessageVariant::InfoSource{
-                    protocol_version: try!(serde::Deserialize::deserialize(deserializer))),
+                    protocol_version: try!(serde::Deserialize::deserialize(deserializer)),
                     vendor_id: try!(serde::Deserialize::deserialize(deserializer)),
                     guid_prefix: try!(serde::Deserialize::deserialize(deserializer))
-                }
+                })
             }, /* InfoSource */
 //            SubmessageId::INFO_REPLY_IP4 => 0x0d, /* InfoReplyIp4 */
 //            SubmessageId::INFO_DST => 0x0e, /* InfoDestination */
