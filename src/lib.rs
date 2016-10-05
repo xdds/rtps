@@ -4,6 +4,7 @@
 
 #![feature(rustc_macro)]
 #![feature(type_ascription)]
+#![feature(rustc_attrs)]
 
 // Clippy specific settings
 #![feature(plugin)]

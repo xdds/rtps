@@ -30,7 +30,8 @@ pub struct SubmessageV2 {
 #[derive(Debug,PartialEq)]
 pub enum SubmessageVariant {
     // Interpreter Submessages
-    InfoDestination{ guid_prefix: GuidPrefix },
+    InfoDestination( GuidPrefix ),
+    // TODO: not positive the on-wire format of a Locator_t*. Not length-prefixed?
     InfoReply{ unicast_locator_list: LocatorList /* , multicast_locator_list: Option<LocatorList> TODO: relies on presence of multicast flag above */ },
     InfoSource{ protocol_version: ProtocolVersion, vendor_id: VendorId, guid_prefix: GuidPrefix},
     InfoTimestamp(Timestamp),
@@ -42,22 +43,18 @@ pub enum SubmessageVariant {
     DataFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, fragment_start_num: FragmentNumber, fragments_in_submessage: u16, data_size: u32, fragment_size: u16, /*, inline_qos: Option<InlineQOS>, */ serialized_payload: ArcBuffer },
     Gap { reader_id: EntityId, writer_id: EntityId, gap_start: SequenceNumber, gap_list: SequenceNumberSet },
     HeartBeat { reader_id: EntityId, writer_id: EntityId, first_sn: SequenceNumber, last_sn: SequenceNumber, count: Count },
-    HeartbeatFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, last_fragment_number: FragmentNumber, count: Count  },
-    NackFrag
+    HeartbeatFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, last_fragment_number: FragmentNumber, count: Count },
+    NackFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, fragment_number_state: FragmentNumberSet, count: Count },
 }
 
 impl serde::Deserialize for SubmessageVariant {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
         let kind : SubmessageId = try!(serde::Deserialize::deserialize(deserializer));
         let _ : u8 = try!(serde::Deserialize::deserialize(deserializer));
-        // len of message
+        // len of message. TODO: use to confirm the proper number of bytes are read
         let _ : u32 = try!(serde::Deserialize::deserialize(deserializer));
 
         match kind {
-//            SubmessageId::PAD => 0x01, /* Pad */
-//            SubmessageId::ACKNACK => 0x06, /* AckNack */
-//            SubmessageId::HEARTBEAT => 0x07, /* Heartbeat */
-//            SubmessageId::GAP => 0x08, /* Gap */
             SubmessageId::INFO_TS => {
                 // Wow, such terse
                 Ok(SubmessageVariant::InfoTimestamp(try!(serde::Deserialize::deserialize(deserializer))))
@@ -68,16 +65,39 @@ impl serde::Deserialize for SubmessageVariant {
                     vendor_id: try!(serde::Deserialize::deserialize(deserializer)),
                     guid_prefix: try!(serde::Deserialize::deserialize(deserializer))
                 })
-            }, /* InfoSource */
-//            SubmessageId::INFO_REPLY_IP4 => 0x0d, /* InfoReplyIp4 */
-//            SubmessageId::INFO_DST => 0x0e, /* InfoDestination */
-//            SubmessageId::INFO_REPLY => 0x0f, /* InfoReply */
-//            SubmessageId::NACK_FRAG => 0x12, /* NackFrag */
+            },
+            SubmessageId::INFO_REPLY => {
+                Ok(SubmessageVariant::InfoReply{
+                    unicast_locator_list: try!(serde::Deserialize::deserialize(deserializer))
+                })
+            },
+            SubmessageId::INFO_DST => {
+                Ok(SubmessageVariant::InfoDestination(try!(serde::Deserialize::deserialize(deserializer))))
+            },
+            SubmessageId::INFO_REPLY_IP4 => {
+                Err(Error::custom("we don't do ipv4 specialization yet"))
+//                0x0f
+            },
+
+            //            SubmessageId::PAD => 0x01, /* Pad */
+            //            SubmessageId::ACKNACK => 0x06, /* AckNack */
+            //            SubmessageId::HEARTBEAT => 0x07, /* Heartbeat */
+            //            SubmessageId::GAP => 0x08, /* Gap */
+            SubmessageId::NACK_FRAG => {
+//                0x12
+                Ok(SubmessageVariant::NackFrag{
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+                    fragment_number_state: try!(serde::Deserialize::deserialize(deserializer)),
+                    count: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
 //            SubmessageId::HEARTBEAT_FRAG => 0x13, /* HeartbeatFrag */
 //            SubmessageId::DATA => 0x15, /* Data */
 //            SubmessageId::DATA_FRAG => 0x16, /* DataFrag */
             other => {
-                panic!("ahhh: {:?}", other)
+                Err(Error::custom(format!("unsupported: {:?}", other)))
             },
         }
     }

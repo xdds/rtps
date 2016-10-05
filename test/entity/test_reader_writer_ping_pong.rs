@@ -10,7 +10,7 @@ fn test_ping_pong() {
     let mut writer = StatelessWriter::new(WriterInitArgs{
         guid: Guid::new(),
         unicast_locator_list: vec![
-            Locator::KIND_UDPv4([0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1], 8000),
+            Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1]),
         ],
         .. Default::default()
     });
@@ -26,7 +26,7 @@ fn test_ping_pong() {
     let reader = StatelessReader::new(ReaderInitArgs{
         guid: Guid::new(),
         unicast_locator_list: vec![
-            Locator::KIND_UDPv4([0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1], 8000)
+            Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1])
         ],
         .. Default::default()
     }).unwrap();

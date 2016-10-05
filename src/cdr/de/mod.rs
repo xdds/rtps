@@ -51,24 +51,32 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
         visitor.visit_u32(val)
     }
 
-    fn deserialize_u64<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        unimplemented!()
+    fn deserialize_u64<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let mut buf: [u8; 8] = [0; 8];
+        try!(self.data.read(&mut buf));
+        let val = byteorder::BigEndian::read_u64(&buf[..]);
+        visitor.visit_u64(val)
     }
 
     fn deserialize_isize<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         unimplemented!()
     }
 
-    fn deserialize_i8<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        unimplemented!()
+    fn deserialize_i8<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let mut buf : [u8; 1] = [0; 1];
+        try!(self.data.read(&mut buf));
+        visitor.visit_i8(buf[0] as i8)
     }
 
     fn deserialize_i16<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         unimplemented!()
     }
 
-    fn deserialize_i32<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        unimplemented!()
+    fn deserialize_i32<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let mut buf: [u8; 4] = [0; 4];
+        try!(self.data.read(&mut buf));
+        let val = byteorder::BigEndian::read_i32(&buf[..]);
+        visitor.visit_i32(val)
     }
 
     fn deserialize_i64<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
