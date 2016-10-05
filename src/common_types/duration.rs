@@ -1,7 +1,7 @@
 use std::time;
 use std::default::Default;
 
-#[derive(Clone,Copy)]
+#[derive(Clone,Copy,Debug)]
 pub struct Duration {
     duration: time::Duration
 }

@@ -5,10 +5,16 @@ use std::sync::{ Arc };
 use std::sync::atomic::{ Ordering };
 use std::io;
 
+use serde;
+
 use super::ReaderInitArgs;
 
+use super::super::HistoryCache;
 use super::super::traits::*;
 use super::super::super::common_types::*;
+use super::super::super::Message;
+
+use super::super::super::cdr::{ CdrDeserializer };
 
 pub struct StatelessReader {
     guid: Guid,
@@ -17,7 +23,9 @@ pub struct StatelessReader {
 
     handle: Option<SpawnableTaskHandle>,
 
-    socket: Option<Arc<UdpSocket>>
+    socket: Option<Arc<UdpSocket>>,
+
+    reader_cache: HistoryCache
 }
 
 impl StatelessReader {
@@ -28,7 +36,8 @@ impl StatelessReader {
             multicast_locator_list: args.multicast_locator_list,
 
             handle: None,
-            socket: None
+            socket: None,
+            reader_cache: HistoryCache::new(),
         };
 
         try!(reader.start_listening());
@@ -53,10 +62,23 @@ impl SpawnableTaskTrait for StatelessReader {
             None => unreachable!()
         };
 
-        let (_, _) = try!(socket.recv_from(buf));
-//        let usable_buf = &buf[0..read_size];
+        let (size, /* socketAddr */ _) = try!(socket.recv_from(buf));
+        let data = &buf[0..size];
+        let mut reader = io::Cursor::new(data);
 
-//        panic!("buf: {:?}", usable_buf.to_owned());
+        let _ : Message = match serde::Deserialize::deserialize(&mut CdrDeserializer::new(&mut reader)) {
+            Ok(msg) => msg,
+            Err(_) => return Err(io::Error::new(io::ErrorKind::Other, "meow"))
+        };
+
+        // TODO: should use the two kinds of submessage elements:
+        //
+//        for submessage in message.submessages {
+//            history_cache.add_change(CacheChange::new(ChangeKind::ALIVE, message.));
+//        }
+
+//        panic!("{:?}", message);
+
         Ok(())
     }
 
@@ -67,7 +89,7 @@ impl SpawnableTaskTrait for StatelessReader {
         }
     }
 
-    fn join(self) -> thread::Result<()> {
+    fn join(self) -> thread::Result<SpawnableTaskStats> {
         let can_join = self.handle.is_some();
         if can_join {
             self.handle.unwrap().join()

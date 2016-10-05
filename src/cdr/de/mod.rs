@@ -9,8 +9,6 @@ use byteorder;
 use byteorder::ByteOrder;
 use serde;
 
-
-
 pub struct CdrDeserializer<'a, R:'a> {
     data: &'a mut R
 }

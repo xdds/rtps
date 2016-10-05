@@ -30,13 +30,18 @@ fn test_ping_pong() {
         ],
         .. Default::default()
     }).unwrap();
-    let reader_task = SpawnableTaskTrait::spawn(Arc::new(Mutex::new(reader)));
-    thread::sleep(time::Duration::from_millis(10));
-    reader_task.stop();
-    writer_task.stop();
+    let syncy_reader = Arc::new(Mutex::new(reader));
+    {
+        let reader_task = SpawnableTaskTrait::spawn(syncy_reader);
+        thread::sleep(time::Duration::from_millis(10));
+        reader_task.stop();
+        writer_task.stop();
 
-    assert!(writer_task.join().unwrap() == ());
-    assert!(reader_task.join().unwrap() == ());
+        assert_eq!(writer_task.join().unwrap().iterations, 1);
+        assert_eq!(reader_task.join().unwrap().iterations, 2);
+    }
+
+//    syncy_reader.as_ref().
 
 
 }

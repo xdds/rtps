@@ -2,6 +2,7 @@
 
 use super::SequenceNumber;
 
+#[derive(PartialEq,Debug)]
 pub struct SequenceNumberSet {
     pub base: SequenceNumber
 }

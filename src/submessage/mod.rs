@@ -14,8 +14,71 @@ use super::common_types::*;
 #[derive(Deserialize,Debug,PartialEq)]
 pub struct Submessage {
     pub id: SubmessageId,
+    // TODO: single byte is multi-purpose, switch to bitflag
+    // add multicast flag
     pub endianness: Endianness,
-    pub buf: ArcBuffer
+
+    pub buf: ArcBuffer,
+}
+
+#[derive(Deserialize,Debug,PartialEq)]
+pub struct SubmessageV2 {
+    pub variant: SubmessageVariant
+}
+
+/// 8.3.4.1 Rules Followed by the Message Receiver
+#[derive(Debug,PartialEq)]
+pub enum SubmessageVariant {
+    // Interpreter Submessages
+    InfoDestination{ guid_prefix: GuidPrefix },
+    InfoReply{ unicast_locator_list: LocatorList /* , multicast_locator_list: Option<LocatorList> TODO: relies on presence of multicast flag above */ },
+    InfoSource{ protocol_verseion: ProtocolVersion, vendor_id: VendorId, guid_prefix: GuidPrefix},
+    InfoTimestamp(Timestamp),
+
+    // Entity Submessages
+    AckNack { reader_id: EntityId, writer_id: EntityId, reader_sn_state: SequenceNumberSet, count: Count  },
+    Data { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber/*, inline_qos: Option<InlineQOS> */, serialized_payload: ArcBuffer  },
+    // TODO: Data frag will require a 'buffer farm' concept so we can process multiple messages then form a single cache_change
+    DataFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, fragment_start_num: FragmentNumber, fragments_in_submessage: u16, data_size: u32, fragment_size: u16, /*, inline_qos: Option<InlineQOS>, */ serialized_payload: ArcBuffer },
+    Gap { reader_id: EntityId, writer_id: EntityId, gap_start: SequenceNumber, gap_list: SequenceNumberSet },
+    HeartBeat { reader_id: EntityId, writer_id: EntityId, first_sn: SequenceNumber, last_sn: SequenceNumber, count: Count },
+    HeartbeatFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, last_fragment_number: FragmentNumber, count: Count  },
+    NackFrag
+}
+
+impl serde::Deserialize for SubmessageVariant {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
+        let kind : SubmessageId = try!(serde::Deserialize::deserialize(deserializer));
+        let _ : u8 = try!(serde::Deserialize::deserialize(deserializer));
+
+        match kind {
+//            SubmessageId::PAD => 0x01, /* Pad */
+//            SubmessageId::ACKNACK => 0x06, /* AckNack */
+//            SubmessageId::HEARTBEAT => 0x07, /* Heartbeat */
+//            SubmessageId::GAP => 0x08, /* Gap */
+            SubmessageId::INFO_TS => {
+                // Wow, such terse
+                Ok(SubmessageVariant::InfoTimestamp(try!(serde::Deserialize::deserialize(deserializer))))
+            },
+            SubmessageId::INFO_SRC => {
+                Ok(SubmessageVariant::InfoSource{
+                    protocol_version: try!(serde::Deserialize::deserialize(deserializer))),
+                    vendor_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    guid_prefix: try!(serde::Deserialize::deserialize(deserializer))
+                }
+            }, /* InfoSource */
+//            SubmessageId::INFO_REPLY_IP4 => 0x0d, /* InfoReplyIp4 */
+//            SubmessageId::INFO_DST => 0x0e, /* InfoDestination */
+//            SubmessageId::INFO_REPLY => 0x0f, /* InfoReply */
+//            SubmessageId::NACK_FRAG => 0x12, /* NackFrag */
+//            SubmessageId::HEARTBEAT_FRAG => 0x13, /* HeartbeatFrag */
+//            SubmessageId::DATA => 0x15, /* Data */
+//            SubmessageId::DATA_FRAG => 0x16, /* DataFrag */
+            other => {
+                panic!("ahhh: {:?}", other)
+            },
+        }
+    }
 }
 
 #[allow(non_camel_case_types)]

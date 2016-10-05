@@ -173,7 +173,7 @@ impl SpawnableTaskTrait for StatelessWriter {
         }
     }
 
-    fn join(self) -> thread::Result<()> {
+    fn join(self) -> thread::Result<SpawnableTaskStats> {
         let can_join = self.handle.is_some();
         if can_join {
             self.handle.unwrap().join()

@@ -6,8 +6,14 @@ use std;
 use std::error::Error;
 
 pub struct SpawnableTaskHandle {
-    pub handle: thread::JoinHandle<()>,
+    pub handle: thread::JoinHandle<SpawnableTaskStats>,
     pub stop_signal: Arc<AtomicBool>
+}
+
+#[derive(Debug,PartialEq)]
+pub struct SpawnableTaskStats {
+    pub iterations: u32,
+//    pub custom_stats: Option<Box<std::fmt::Debug + std::cmp::PartialEq>>,
 }
 
 impl SpawnableTaskHandle {
@@ -15,9 +21,9 @@ impl SpawnableTaskHandle {
         self.stop_signal.store(true, Ordering::Relaxed);
     }
 
-    pub fn join(self) -> Result<(),Box<std::any::Any + Send + 'static>> {
+    pub fn join(self) -> Result<SpawnableTaskStats,Box<std::any::Any + Send + 'static>> {
         match self.handle.join() {
-            Ok(_) => Ok(()),
+            Ok(stats) => Ok(stats),
             Err(err) => Err(Box::new(err))
         }
     }
@@ -37,6 +43,10 @@ pub trait SpawnableTaskTrait {
         let handle = thread::spawn(move || {
             // put it on the stack! default on linux is like 2MB
             let mut buf = [0; 1024*64];
+            let mut stats = SpawnableTaskStats{
+                iterations: 0,
+//                custom_stats: None,
+            };
 
             let this = thread_this;
 
@@ -44,6 +54,7 @@ pub trait SpawnableTaskTrait {
                 let mut this = this.lock().unwrap();
 
                 let res = Self::werk(&mut this, &mut buf[..]);
+                stats.iterations += 1;
 
                 // TODO: we need to be sure there aren't packets in limbo going either in or out
                 if signal_clone.load(Ordering::Relaxed) {
@@ -65,6 +76,8 @@ pub trait SpawnableTaskTrait {
                 // Could put exit check here but could
                 // cancel thread when socket still has data... does it matter?
             }
+
+            stats
         });
 
         SpawnableTaskHandle {
@@ -74,5 +87,5 @@ pub trait SpawnableTaskTrait {
     }
 
     fn stop(&mut self);
-    fn join(self) -> thread::Result<()>;
+    fn join(self) -> thread::Result<SpawnableTaskStats>;
 }

@@ -21,15 +21,15 @@ fn deserialize_message() {
         let message: rtps::Message = Deserialize::deserialize(&mut de).unwrap();
 
         assert_eq!(message, rtps::Message {
-        junk: [82, 84, 80, 83],
-        protocol_type: rtps::common_types::ProtocolVersion::VERSION_2_2,
-        vendor_id: [86, 19],
-        submessages: vec![rtps::Submessage {
-            id: rtps::SubmessageId::DATA,
-            endianness: rtps::common_types::Endianness::Little,
-            buf: rtps::common_types::ArcBuffer::from_vec(vec![1,2,3,4])
-        }],
-    });
+            junk: [82, 84, 80, 83],
+            protocol_type: rtps::common_types::ProtocolVersion::VERSION_2_2,
+            vendor_id: [86, 19],
+            submessages: vec![rtps::Submessage {
+                id: rtps::SubmessageId::DATA,
+                endianness: rtps::common_types::Endianness::Little,
+                buf: rtps::common_types::ArcBuffer::from_vec(vec![1,2,3,4])
+            }],
+        });
     }
     assert_eq!(cursor.position() as usize, bytes.len());
 }
