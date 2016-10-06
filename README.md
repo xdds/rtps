@@ -17,6 +17,10 @@ Find the spec here: [http://www.omg.org/spec/DDSI-RTPS/2.2/PDF/](http://www.omg.
 CDR:
  - [x] Enough serialization/deserialization to get by
  - [ ] Full serialization/deserialization for all CDR types
+ - [ ] Set submessage endianness on the serializer
+ - [ ] Manage alignment
+ - [ ] Investigate how to make zero-allocation
+ 
 RTPS:
  - [x] Entity thread abstraction
  - [ ] Basic entity thread stats

@@ -43,9 +43,6 @@ pub use self::reliability_kind::*;
 mod sequence_number;
 pub use self::sequence_number::*;
 
-mod sequence_number_set;
-pub use self::sequence_number_set::*;
-
 mod timestamp;
 pub use self::timestamp::*;
 

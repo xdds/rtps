@@ -43,6 +43,7 @@ pub enum SubmessageVariant {
     HeartBeat { reader_id: EntityId, writer_id: EntityId, first_sn: SequenceNumber, last_sn: SequenceNumber, count: Count },
     HeartbeatFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, last_fragment_number: FragmentNumber, count: Count },
     NackFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, fragment_number_state: FragmentNumberSet, count: Count },
+    Pad
 }
 
 impl serde::Deserialize for SubmessageVariant {
@@ -77,12 +78,64 @@ impl serde::Deserialize for SubmessageVariant {
 //                0x0f
             },
 
-            //            SubmessageId::PAD => 0x01, /* Pad */
-            //            SubmessageId::ACKNACK => 0x06, /* AckNack */
-            //            SubmessageId::HEARTBEAT => 0x07, /* Heartbeat */
-            //            SubmessageId::GAP => 0x08, /* Gap */
+            SubmessageId::ACKNACK => {
+                Ok(SubmessageVariant::AckNack {
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    reader_sn_state: try!(serde::Deserialize::deserialize(deserializer)),
+                    count: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
+            SubmessageId::DATA => {
+                Ok(SubmessageVariant::Data {
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+                    serialized_payload: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
+            SubmessageId::DATA_FRAG => {
+                Ok(SubmessageVariant::DataFrag {
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+
+                    fragment_start_num: try!(serde::Deserialize::deserialize(deserializer)),
+                    fragments_in_submessage: try!(serde::Deserialize::deserialize(deserializer)),
+                    data_size: try!(serde::Deserialize::deserialize(deserializer)),
+                    fragment_size: try!(serde::Deserialize::deserialize(deserializer)),
+
+                    serialized_payload: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
+            SubmessageId::HEARTBEAT => {
+                Ok(SubmessageVariant::HeartBeat{
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    first_sn: try!(serde::Deserialize::deserialize(deserializer)),
+                    last_sn: try!(serde::Deserialize::deserialize(deserializer)),
+                    count: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
+            SubmessageId::HEARTBEAT_FRAG => {
+                Ok(SubmessageVariant::HeartbeatFrag {
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+                    last_fragment_number: try!(serde::Deserialize::deserialize(deserializer)),
+                    count: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
+            SubmessageId::GAP => {
+                Ok(SubmessageVariant::Gap{
+                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+                    gap_start: try!(serde::Deserialize::deserialize(deserializer)),
+                    gap_list: try!(serde::Deserialize::deserialize(deserializer)),
+                })
+            },
+
             SubmessageId::NACK_FRAG => {
-//                0x12
                 Ok(SubmessageVariant::NackFrag{
                     reader_id: try!(serde::Deserialize::deserialize(deserializer)),
                     writer_id: try!(serde::Deserialize::deserialize(deserializer)),
@@ -91,12 +144,9 @@ impl serde::Deserialize for SubmessageVariant {
                     count: try!(serde::Deserialize::deserialize(deserializer)),
                 })
             },
-//            SubmessageId::HEARTBEAT_FRAG => 0x13, /* HeartbeatFrag */
-//            SubmessageId::DATA => 0x15, /* Data */
-//            SubmessageId::DATA_FRAG => 0x16, /* DataFrag */
-            other => {
-                Err(serde::Error::custom(format!("unsupported: {:?}", other)))
-            },
+            SubmessageId::PAD => {
+                Ok(SubmessageVariant::Pad)
+            }
         }
     }
 }

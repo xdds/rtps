@@ -40,8 +40,11 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
         visitor.visit_u8(buf[0])
     }
 
-    fn deserialize_u16<V>(&mut self, _: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
-        unimplemented!()
+    fn deserialize_u16<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
+        let mut buf : [u8; 2] = [0; 2];
+        try!(self.data.read(&mut buf));
+        let val = byteorder::BigEndian::read_u16(&buf[..]);
+        visitor.visit_u16(val)
     }
 
     fn deserialize_u32<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
