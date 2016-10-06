@@ -273,8 +273,8 @@ fn deserialize_submessage() {
         let mut cursor = Cursor::new(*b);
         {
             let mut de = rtps::cdr::CdrDeserializer::new(&mut cursor);
-            let message: rtps::SubmessageV2 = Deserialize::deserialize(&mut de).unwrap();
-            assert_eq!(message.variant, *e);
+            let submessage : rtps::Submessage = Deserialize::deserialize(&mut de).unwrap();
+            assert_eq!(submessage.variant, *e);
         }
         assert_eq!(cursor.position() as usize, (*b).len());
     }

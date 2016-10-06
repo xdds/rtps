@@ -1,18 +1,21 @@
 use rtps::cdr::{CdrSerializer};
-use rtps::common_types::*;
+use rtps::common_types as t;
 use rtps::submessage::*;
 use serde::ser::Serialize;
 
 #[test]
 fn test_serialize() {
     let submessage = Submessage {
-        id: SubmessageId::DATA,
-        endianness: Endianness::Little,
-        buf: ArcBuffer::from_vec(vec![1,2,3,4])
+        variant: SubmessageVariant::Data {
+            reader_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInReader },
+            writer_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInWriter },
+            writer_sn: 5,
+            serialized_payload: t::ArcBuffer::from_vec(vec![1,2,3,4, 11,12,13,14]),
+        }
     };
     let buf : Vec<u8> = vec![];
     let mut serializer = CdrSerializer{
-        endianness: Endianness::Big,
+        endianness: t::Endianness::Big,
         write_handle: buf
     };
     submessage.serialize(&mut serializer).unwrap();

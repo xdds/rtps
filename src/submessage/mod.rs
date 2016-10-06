@@ -1,12 +1,6 @@
 use serde::{ Serialize, Serializer };
 use serde;
 
-//mod content;
-//pub use self::content::*;
-
-mod traits;
-pub use self::traits::*;
-
 use super::common_types::*;
 
 #[derive(Deserialize,Debug,PartialEq)]
@@ -217,17 +211,6 @@ bitflags! {
 
 impl Serialize for Submessage {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {
-        // Write the submessage id
-        try!(self.id.serialize(serializer));
-
-        // Write the submessage flags (aka, the endianness)
-        let flags : u8 = match self.endianness {
-            Endianness::Little => 1,
-            Endianness::Big => 0
-        };
-        try!(serializer.serialize_u8(flags));
-
-        try!(serializer.serialize_u32(self.buf.len() as u32));
-        serializer.serialize_bytes(self.buf.buf())
+        panic!("busted")
     }
 }

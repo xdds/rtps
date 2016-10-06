@@ -72,12 +72,11 @@ impl StatelessWriter {
         self.nack_response_delay
     }
 
-    pub fn heartbeat(&mut self, reader_id: EntityId) -> Heartbeat {
+    pub fn heartbeat(&mut self, reader_id: EntityId) -> SubmessageVariant {
         let max = self.writer_cache.get_seq_num_max().unwrap_or(0);
         let min = self.writer_cache.get_seq_num_min().unwrap_or(0);
 
-        let heartbeat = Heartbeat {
-            is_key: false,
+        let heartbeat = SubmessageVariant::HeartBeat {
             reader_id: reader_id,
             writer_id: self.guid.entity_id,
 
@@ -140,7 +139,7 @@ impl SpawnableTaskTrait for StatelessWriter {
                 };
 
                 let message = Message::new(vec![
-                    change.to_submessage()
+                    change.to_submessage(self.guid)
                 ]);
                 // need control flow to create my non-io::Error stuff.
                 match message.serialize(&mut serializer) {

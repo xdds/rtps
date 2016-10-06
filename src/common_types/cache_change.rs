@@ -1,5 +1,5 @@
 use super::*;
-use super::super::{ Submessage, SubmessageId };
+use super::super::{ Submessage, SubmessageVariant };
 
 #[derive(Clone,Debug)]
 pub struct CacheChange {
@@ -35,11 +35,15 @@ impl CacheChange {
         self.sequence_number
     }
 
-    pub fn to_submessage(&self) -> Submessage {
+    pub fn to_submessage(&self, reader_id: Guid) -> Submessage {
         Submessage {
-            id: SubmessageId::DATA,
-            endianness: Endianness::Little,
-            buf: self.data.clone(),
+            variant: SubmessageVariant::Data {
+                reader_id: reader_id.entity_id,
+                writer_id: self.writer_guid.entity_id,
+                writer_sn: self.sequence_number,
+                serialized_payload: self.data.clone(),
+
+            }
         }
     }
 }
