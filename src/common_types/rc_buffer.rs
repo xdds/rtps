@@ -3,7 +3,7 @@ use serde;
 use std::sync::Arc;
 use std::borrow::Borrow;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct ArcBuffer {
     buf: Arc<Vec<u8>>
 }

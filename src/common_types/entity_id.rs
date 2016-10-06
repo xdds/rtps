@@ -43,7 +43,26 @@ impl serde::Deserialize for EntityKind {
     }
 }
 
-#[derive(Default, Debug, PartialEq, Copy, Clone, Deserialize)]
+impl serde::Serialize for EntityKind {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: serde::Serializer {
+        let val = match *self {
+            EntityKind::BuiltInUnknown => 0xc0,
+            EntityKind::BuiltInParticipant => 0xc1,
+            EntityKind::BuiltInWriterWKey => 0xc2,
+            EntityKind::BuiltInWriter => 0xc3,
+            EntityKind::BuiltInReader => 0xc4,
+            EntityKind::BuiltInReaderWKey => 0xc7,
+            EntityKind::UserUnknown => 0x00,
+            EntityKind::UserWriterWKey => 0x02,
+            EntityKind::UserWriter => 0x03,
+            EntityKind::UserReader => 0x04,
+            EntityKind::UserReaderWKey => 0x07,
+        };
+        serializer.serialize_u8(val)
+    }
+}
+
+#[derive(Default, Debug, PartialEq, Copy, Clone, Deserialize, Serialize)]
 pub struct EntityId {
     pub entity_key: [u8; 3],
     pub entity_kind: EntityKind,

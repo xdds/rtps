@@ -211,6 +211,103 @@ bitflags! {
 
 impl Serialize for Submessage {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {
-        panic!("busted")
+        match self.variant {
+            SubmessageVariant::InfoTimestamp(ref ts) => {
+                try!(serializer.serialize_u8(0x09));
+                try!(ts.serialize(serializer));
+                Ok(())
+            },
+            SubmessageVariant::InfoSource{ protocol_version, vendor_id, guid_prefix } => {
+                try!(serializer.serialize_u8(0x0c));
+                try!(protocol_version.serialize(serializer));
+                try!(vendor_id.serialize(serializer));
+                try!(guid_prefix.serialize(serializer));
+                Ok(())
+            },
+//            SubmessageId::INFO_REPLY => {
+//                Ok(SubmessageVariant::InfoReply{
+//                    unicast_locator_list: try!(serde::Deserialize::deserialize(deserializer))
+//                })
+//            },
+//            SubmessageId::INFO_DST => {
+//                Ok(SubmessageVariant::InfoDestination(try!(serde::Deserialize::deserialize(deserializer))))
+//            },
+//            SubmessageId::INFO_REPLY_IP4 => {
+//                Err(serde::Error::custom("we don't do ipv4 specialization yet"))
+//                //                0x0f
+//            },
+//
+//            SubmessageId::ACKNACK => {
+//                Ok(SubmessageVariant::AckNack {
+//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    reader_sn_state: try!(serde::Deserialize::deserialize(deserializer)),
+//                    count: try!(serde::Deserialize::deserialize(deserializer)),
+//                })
+//            },
+            SubmessageVariant::Data{ reader_id, writer_id, writer_sn /*, inline_qos: Option<InlineQOS> */, ref serialized_payload } => {
+                try!(serializer.serialize_u8(0x15));
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(writer_sn.serialize(serializer));
+                try!(serialized_payload.serialize(serializer));
+                Ok(())
+            },
+//            SubmessageId::DATA_FRAG => {
+//                Ok(SubmessageVariant::DataFrag {
+//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+//
+//                    fragment_start_num: try!(serde::Deserialize::deserialize(deserializer)),
+//                    fragments_in_submessage: try!(serde::Deserialize::deserialize(deserializer)),
+//                    data_size: try!(serde::Deserialize::deserialize(deserializer)),
+//                    fragment_size: try!(serde::Deserialize::deserialize(deserializer)),
+//
+//                    serialized_payload: try!(serde::Deserialize::deserialize(deserializer)),
+//                })
+//            },
+//            SubmessageId::HEARTBEAT => {
+//                Ok(SubmessageVariant::HeartBeat{
+//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    first_sn: try!(serde::Deserialize::deserialize(deserializer)),
+//                    last_sn: try!(serde::Deserialize::deserialize(deserializer)),
+//                    count: try!(serde::Deserialize::deserialize(deserializer)),
+//                })
+//            },
+//            SubmessageId::HEARTBEAT_FRAG => {
+//                Ok(SubmessageVariant::HeartbeatFrag {
+//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+//                    last_fragment_number: try!(serde::Deserialize::deserialize(deserializer)),
+//                    count: try!(serde::Deserialize::deserialize(deserializer)),
+//                })
+//            },
+//            SubmessageId::GAP => {
+//                Ok(SubmessageVariant::Gap{
+//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    gap_start: try!(serde::Deserialize::deserialize(deserializer)),
+//                    gap_list: try!(serde::Deserialize::deserialize(deserializer)),
+//                })
+//            },
+//
+//            SubmessageId::NACK_FRAG => {
+//                Ok(SubmessageVariant::NackFrag{
+//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
+//                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
+//                    fragment_number_state: try!(serde::Deserialize::deserialize(deserializer)),
+//                    count: try!(serde::Deserialize::deserialize(deserializer)),
+//                })
+//            },
+//            SubmessageId::PAD => {
+//                Ok(SubmessageVariant::Pad)
+//            }
+            _ => panic!(format!("unsupported variant {:?}", self.variant))
+
+        }
     }
 }

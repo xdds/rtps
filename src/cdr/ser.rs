@@ -1,7 +1,8 @@
 use serde::{ Serialize, Serializer };
 
-use serde::ser::Error as SerErr;
-use std::error::Error as Err;
+use std;
+use std::error::Error;
+use serde;
 
 use byteorder::{LittleEndian, BigEndian, WriteBytesExt};
 
@@ -23,20 +24,28 @@ impl Display for CdrError {
     }
 }
 
-impl Err for CdrError {
+impl std::error::Error for CdrError {
     fn description(&self) -> &str {
         "NO"
     }
 
-    fn cause(&self) -> Option<&Err> {
+    fn cause(&self) -> Option<&std::error::Error> {
         None
     }
 }
 
-impl SerErr for CdrError {
+impl serde::ser::Error for CdrError {
     fn custom<T: Into<String>>(_: T) -> Self {
         CdrError{
             reason: "fdsa".to_string()
+        }
+    }
+}
+
+impl From<std::io::Error> for CdrError {
+    fn from(err: std::io::Error) -> Self {
+        CdrError{
+            reason: format!("{:?}", err)
         }
     }
 }
@@ -138,8 +147,17 @@ impl<W: Write> Serializer for CdrSerializer<W> {
 
     }
 
-    fn serialize_u64(&mut self, _ /* v */: u64) -> Result<(), Self::Error> {
-        unimplemented!();
+    fn serialize_u64(&mut self, v: u64) -> Result<(), Self::Error> {
+        match self.endianness {
+            Endianness::Little => {
+                try!(self.write_handle.write_u64::<LittleEndian>(v));
+                Ok(())
+            },
+            Endianness::Big => {
+                try!(self.write_handle.write_u64::<BigEndian>(v));
+                Ok(())
+            }
+        }
     }
 
     fn serialize_f32(&mut self, _ /* v */: f32) -> Result<(), Self::Error> {
@@ -256,13 +274,13 @@ impl<W: Write> Serializer for CdrSerializer<W> {
     }
 
     fn serialize_struct(&mut self, _: &'static str, _: usize) -> Result<Self::StructState, Self::Error> {
-        unimplemented!();
+        Ok(())
     }
-    fn serialize_struct_elt<V: Serialize>(&mut self, _: &mut Self::StructState, _: &'static str, _: V) -> Result<(), Self::Error> {
-        unimplemented!();
+    fn serialize_struct_elt<V: Serialize>(&mut self, _: &mut Self::StructState, _: &'static str, visitor: V) -> Result<(), Self::Error> {
+        visitor.serialize(self)
     }
     fn serialize_struct_end(&mut self, _: Self::StructState) -> Result<(), Self::Error> {
-        unimplemented!();
+        Ok(())
     }
     fn serialize_struct_variant(&mut self, _: &'static str, _: usize, _: &'static str, _: usize) -> Result<Self::StructVariantState, Self::Error> {
         unimplemented!();

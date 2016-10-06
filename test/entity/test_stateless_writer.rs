@@ -30,13 +30,13 @@ fn test_stateless_writer_heartbeat_increments_count() {
 
     let heartbeat = writer.heartbeat(reader_entity_id);
     if let SubmessageVariant::HeartBeat{ref mut count, ..} = common_heartbeat {
-        *count += 1;
+        *count = 0;
     }
     assert_eq!(heartbeat, common_heartbeat);
 
     let heartbeat2 = writer.heartbeat(reader_entity_id);
     if let SubmessageVariant::HeartBeat{ref mut count, ..} = common_heartbeat {
-        *count += 1;
+        *count = 1;
     }
     assert_eq!(heartbeat2, common_heartbeat);
 

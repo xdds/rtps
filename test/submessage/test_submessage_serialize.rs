@@ -19,9 +19,6 @@ fn test_serialize() {
         write_handle: buf
     };
     submessage.serialize(&mut serializer).unwrap();
-    let expected = vec![0x15, 1,
-        0, 0, 0, 4,
-        1, 2, 3, 4
-    ];
+    let expected = vec![21, 0, 0, 0, 3, 0, 0, 0, 196, 0, 0, 0, 3, 0, 0, 0, 195, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 1, 2, 3, 4, 11, 12, 13, 14];
     assert_eq!(serializer.write_handle, expected);
 }
