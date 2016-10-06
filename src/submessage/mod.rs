@@ -207,10 +207,7 @@ impl serde::Deserialize for SubmessageId {
             0x13 => Ok(SubmessageId::HEARTBEAT_FRAG), /* HeartbeatFrag */
             0x15 => Ok(SubmessageId::DATA), /* Data */
             0x16 => Ok(SubmessageId::DATA_FRAG), /* DataFrag */
-            _ => {
-                Err(serde::Error::custom(format!("unknown type {:?}", byte)))
-//                Err(CdrDeserializerError{ thing: format!("unknown type {:?}", byte) })
-            },
+            _ => Err(serde::Error::custom(format!("unknown type {:?}", byte))),
         }
     }
 }
