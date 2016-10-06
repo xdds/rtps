@@ -1,8 +1,8 @@
 use serde::{ Serialize, Serializer };
 use serde;
 
-mod content;
-pub use self::content::*;
+//mod content;
+//pub use self::content::*;
 
 mod traits;
 pub use self::traits::*;
@@ -11,16 +11,6 @@ use super::common_types::*;
 
 #[derive(Deserialize,Debug,PartialEq)]
 pub struct Submessage {
-    pub id: SubmessageId,
-    // TODO: single byte is multi-purpose, switch to bitflag
-    // add multicast flag
-    pub endianness: Endianness,
-
-    pub buf: ArcBuffer,
-}
-
-#[derive(Deserialize,Debug,PartialEq)]
-pub struct SubmessageV2 {
     pub variant: SubmessageVariant
 }
 
@@ -153,7 +143,7 @@ impl serde::Deserialize for SubmessageVariant {
 
 #[allow(non_camel_case_types)]
 #[derive(Debug,PartialEq)]
-pub enum SubmessageId {
+enum SubmessageId {
     PAD,
     ACKNACK,
     HEARTBEAT,

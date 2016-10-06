@@ -1,5 +1,3 @@
-// killer rad re-export
-pub use super::super::SubmessageId;
 pub use super::super::SubmessageFlags;
 
 pub trait SubmessageContent {
