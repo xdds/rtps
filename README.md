@@ -8,6 +8,10 @@ Real Time Publish Subscribe
     <img src="https://travis-ci.org/xdds/rtps.svg?branch=master">
 </a>
 
+<a href="https://docs.rs/rtps">
+    <img src="https://docs.rs/rtps/badge.svg">
+</a>
+
 A mature standard for building publish subscribe systems, with a unique emphasis on quality of service parameters and fast cross platform implementations.
 
 There are over 20 implementations of RTPS (well, of DDS, but RTPS underpins all those implementations). They range from FPGAs to C/C++/Java. This is the first Rust implementation.
