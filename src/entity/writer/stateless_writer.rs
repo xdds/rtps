@@ -18,7 +18,9 @@ use super::super::super::cdr::*;
 
 pub struct StatelessWriter {
     guid: Guid,
+    /// List of unicast locators (transport, address, port combinations) that can be used to send messages to the Endpoint. The list may be empty.
     unicast_locator_list: LocatorList,
+    /// List of multicast locators (transport, address, port combinations) that can be used to send messages to the Endpoint. The list may be empty.
     multicast_locator_list: LocatorList,
     reliability_level: ReliabilityKind,
     topic_kind: TopicKind,
@@ -30,6 +32,10 @@ pub struct StatelessWriter {
 
     last_change_sequence_number: SequenceNumber,
     heartbeat_count: u32,
+
+//    resend_data_period: Duration,
+    reader_locators: Vec<(Locator,Option<EntityId>)>,
+
 
     handle: Option<SpawnableTaskHandle>
 }
@@ -51,6 +57,8 @@ impl StatelessWriter {
 
             last_change_sequence_number: 0,
             heartbeat_count: 0,
+
+            reader_locators: vec![],
 
             handle: None
         }
@@ -128,6 +136,11 @@ impl WriterTrait for StatelessWriter {
 
 impl SpawnableTaskTrait for StatelessWriter {
     fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
+        for (ref locator, ref reader) in *self.reader_locators {
+            let heartbeat = reader.map(|r| self.heartbeat(r));
+            heartbeat.map(|h| panic!("h: {:?}", h));
+        }
+
         for change in self.writer_cache.iter() {
             let position = {
                 let new_slice = &mut buf[..];

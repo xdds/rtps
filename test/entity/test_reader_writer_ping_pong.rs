@@ -30,6 +30,7 @@ fn test_ping_pong() {
         ],
         .. Default::default()
     }).unwrap();
+
     let syncy_reader = Arc::new(Mutex::new(reader));
     {
         let reader_task = SpawnableTaskTrait::spawn(syncy_reader);
@@ -40,8 +41,5 @@ fn test_ping_pong() {
         assert_eq!(writer_task.join().unwrap().iterations, 1);
         assert_eq!(reader_task.join().unwrap().iterations, 2);
     }
-
-//    syncy_reader.as_ref().
-
 
 }
