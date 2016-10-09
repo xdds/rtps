@@ -9,8 +9,8 @@ use rtps::*;
 fn test_ping_pong() {
     let mut writer = StatelessWriter::new(WriterInitArgs{
         guid: Guid::new(),
-        unicast_locator_list: vec![
-            Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1]),
+        reader_locators: vec![
+            (Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1]),None),
         ],
         .. Default::default()
     });
@@ -39,7 +39,7 @@ fn test_ping_pong() {
         writer_task.stop();
 
         assert_eq!(writer_task.join().unwrap().iterations, 1);
-        assert_eq!(reader_task.join().unwrap().iterations, 2);
+        assert_eq!(reader_task.join().unwrap().iterations, 1);
     }
 
 }

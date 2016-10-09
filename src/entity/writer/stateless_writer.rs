@@ -34,6 +34,11 @@ pub struct StatelessWriter {
     heartbeat_count: u32,
 
 //    resend_data_period: Duration,
+
+    // Better name would be `reader_locator_list` to match other
+    // properties. But this follows the RTPS spec naming.
+    // Also a slightly different type, includes EntityId
+    // if that's been negotiated
     reader_locators: Vec<(Locator,Option<EntityId>)>,
 
 
@@ -58,7 +63,7 @@ impl StatelessWriter {
             last_change_sequence_number: 0,
             heartbeat_count: 0,
 
-            reader_locators: vec![],
+            reader_locators: init_args.reader_locators,
 
             handle: None
         }

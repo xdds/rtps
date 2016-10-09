@@ -14,6 +14,7 @@ impl Create for StatelessWriter {
             heartbeat_period: Duration::new(10,0),
             nack_response_delay: Duration::new(10,0),
             nack_suppression_duration: Duration::new(10,0),
+            reader_locators: Default::default()
         })
     }
 }

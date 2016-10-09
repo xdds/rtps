@@ -11,7 +11,8 @@ pub struct WriterInitArgs {
     pub push_mode: bool,
     pub heartbeat_period: Duration,
     pub nack_response_delay: Duration,
-    pub nack_suppression_duration: Duration
+    pub nack_suppression_duration: Duration,
+    pub reader_locators: Vec<(Locator,Option<EntityId>)>,
 }
 
 impl WriterInitArgs {
@@ -26,6 +27,7 @@ impl WriterInitArgs {
             heartbeat_period: Duration::new(1,0),
             nack_response_delay: Duration::new(1,0),
             nack_suppression_duration: Duration::new(1,0),
+            reader_locators: Default::default()
         }
     }
 }

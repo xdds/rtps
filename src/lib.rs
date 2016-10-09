@@ -1,8 +1,7 @@
 // TODO: for a good time, comment this line and let rust point out all the extra stuff
 #![allow(dead_code)]
 
-
-#![feature(rustc_macro)]
+#![feature(proc_macro)]
 #![feature(type_ascription)]
 #![feature(rustc_attrs)]
 
