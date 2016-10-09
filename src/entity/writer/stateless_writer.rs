@@ -136,8 +136,9 @@ impl WriterTrait for StatelessWriter {
 
 impl SpawnableTaskTrait for StatelessWriter {
     fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
-        for (ref locator, ref reader) in *self.reader_locators {
-            let heartbeat = reader.map(|r| self.heartbeat(r));
+        // TODO: `self.reader_locators.clone()` necessary because `self.heartbeat` wants mut ref.
+        for (_, reader) in self.reader_locators.clone() {
+            let heartbeat = reader.as_ref().map(|r| self.heartbeat(*r));
             heartbeat.map(|h| panic!("h: {:?}", h));
         }
 

@@ -7,7 +7,7 @@ pub type LocatorAddress = [u8; 16];
 pub type LocatorPort = u32;
 
 #[allow(non_camel_case_types)]
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub enum Locator {
     INVALID,
     KIND_INVALID,
