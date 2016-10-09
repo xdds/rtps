@@ -143,8 +143,39 @@ impl SpawnableTaskTrait for StatelessWriter {
     fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
         // TODO: `self.reader_locators.clone()` necessary because `self.heartbeat` wants mut ref.
         for (_, reader) in self.reader_locators.clone() {
-            let heartbeat = reader.as_ref().map(|r| self.heartbeat(*r));
-            heartbeat.map(|h| panic!("h: {:?}", h));
+            let position = {
+                let new_slice = &mut buf[..];
+                let writeable_buf = Cursor::new(new_slice);
+
+                let mut serializer = CdrSerializer {
+                    endianness: Endianness::Big,
+                    write_handle: writeable_buf
+                };
+
+                /* TODO: move to a transaction where the count only goes up once. for now we increment on each host
+                at the writer level. Perhaps we could do count at the ReaderLocator level? */
+                let heartbeat = match reader {
+                    Some(reader) => self.heartbeat(reader),
+                    None => self.heartbeat(EntityId::builtin_unknown())
+                };
+
+                let message = Message::new(vec![ Submessage{ variant: heartbeat } ]);
+
+                match message.serialize(&mut serializer) {
+                    Ok(_) => (),
+                    Err(err) => {
+                        return Err(io::Error::new(io::ErrorKind::Other, err.description()))
+                    },
+                }
+
+                serializer.write_handle.position() as usize
+            };
+
+            let used_buf : &[u8] = &buf[0..position];
+
+            for location in &mut self.unicast_locator_list {
+                try!(location.write(used_buf));
+            }
         }
 
         for change in self.writer_cache.iter() {

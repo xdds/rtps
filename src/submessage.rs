@@ -267,15 +267,15 @@ impl Serialize for Submessage {
 //                    serialized_payload: try!(serde::Deserialize::deserialize(deserializer)),
 //                })
 //            },
-//            SubmessageId::HEARTBEAT => {
-//                Ok(SubmessageVariant::HeartBeat{
-//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    first_sn: try!(serde::Deserialize::deserialize(deserializer)),
-//                    last_sn: try!(serde::Deserialize::deserialize(deserializer)),
-//                    count: try!(serde::Deserialize::deserialize(deserializer)),
-//                })
-//            },
+            SubmessageVariant::HeartBeat { reader_id, writer_id, first_sn, last_sn, count } => {
+                try!(serializer.serialize_u8(0x07));
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(first_sn.serialize(serializer));
+                try!(last_sn.serialize(serializer));
+                try!(count.serialize(serializer));
+                Ok(())
+            },
 //            SubmessageId::HEARTBEAT_FRAG => {
 //                Ok(SubmessageVariant::HeartbeatFrag {
 //                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),

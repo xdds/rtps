@@ -68,3 +68,8 @@ pub struct EntityId {
     pub entity_kind: EntityKind,
 }
 
+impl EntityId {
+    pub fn builtin_unknown() -> Self {
+        EntityId { entity_key: [0,0,0], entity_kind: EntityKind::UserUnknown }
+    }
+}
