@@ -308,7 +308,7 @@ impl Serialize for Submessage {
             SubmessageVariant::Data { reader_id, writer_id, writer_sn /*, inline_qos: Option<InlineQOS> */, ref serialized_payload } => {
                 try!(SubmessageId::DATA.serialize(serializer));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xDD));
+                try!(serializer.serialize_u32(0xFF));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(writer_sn.serialize(serializer));
@@ -318,7 +318,7 @@ impl Serialize for Submessage {
             SubmessageVariant::DataFrag { reader_id, writer_id, writer_sn /*, inline_qos: Option<InlineQOS> */, ref serialized_payload, fragment_start_num, fragments_in_submessage, data_size, fragment_size } => {
                 try!(SubmessageId::DATA_FRAG.serialize(serializer));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xDD));
+                try!(serializer.serialize_u32(0xFF));
 
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
@@ -334,7 +334,7 @@ impl Serialize for Submessage {
             SubmessageVariant::Gap { reader_id, writer_id, gap_start, gap_list } => {
                 try!(SubmessageId::GAP.serialize(serializer));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xEE));
+                try!(serializer.serialize_u32(0xFF));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(gap_start.serialize(serializer));
@@ -344,7 +344,7 @@ impl Serialize for Submessage {
             SubmessageVariant::Heartbeat { reader_id, writer_id, first_sn, last_sn, count } => {
                 try!(serializer.serialize_u8(0x07));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xEE));
+                try!(serializer.serialize_u32(0xFF));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(first_sn.serialize(serializer));
@@ -355,7 +355,7 @@ impl Serialize for Submessage {
             SubmessageVariant::HeartbeatFrag{ reader_id, writer_id, writer_sn, last_fragment_number, count } => {
                 try!(SubmessageId::HEARTBEAT_FRAG.serialize(serializer));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xEE));
+                try!(serializer.serialize_u32(0xFF));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(writer_sn.serialize(serializer));
@@ -366,7 +366,7 @@ impl Serialize for Submessage {
             SubmessageVariant::NackFrag{ reader_id, writer_id, writer_sn, fragment_number_state, count } => {
                 try!(SubmessageId::NACK_FRAG.serialize(serializer));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xEE));
+                try!(serializer.serialize_u32(0xFF));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(writer_sn.serialize(serializer));
@@ -377,7 +377,7 @@ impl Serialize for Submessage {
             SubmessageVariant::Pad => {
                 try!(SubmessageId::PAD.serialize(serializer));
                 try!(serializer.serialize_u8(0x00));
-                try!(serializer.serialize_u32(0xEE));
+                try!(serializer.serialize_u32(0xFF));
                 Ok(())
             }
         }

@@ -78,10 +78,10 @@ impl SpawnableTaskTrait for StatelessReader {
         for submessage in message.submessages {
             match submessage.variant {
                 SubmessageVariant::Heartbeat{reader_id, ..} => {
-                    panic!("sup from {:?}", reader_id)
+//                    panic!("sup from {:?}", reader_id)
                 },
                 other => {
-                    panic!("mother of god: {:?}", other)
+//                    panic!("mother of god: {:?}", other)
                 }
             }
 //            panic!("{:?}", submessage);

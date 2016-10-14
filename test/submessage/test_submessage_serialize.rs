@@ -4,7 +4,7 @@ use rtps::submessage::*;
 use serde::ser::Serialize;
 
 #[test]
-fn test_serialize() {
+fn test_submessage_serialize() {
     let submessage = Submessage {
         variant: SubmessageVariant::Data {
             reader_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInReader },
@@ -19,6 +19,17 @@ fn test_serialize() {
         write_handle: buf
     };
     submessage.serialize(&mut serializer).unwrap();
-    let expected = vec![21, 0, 0, 0, 3, 0, 0, 0, 196, 0, 0, 0, 3, 0, 0, 0, 195, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 1, 2, 3, 4, 11, 12, 13, 14];
+    let expected = vec![
+        21, // submessage id = data
+        0, // flags = null
+        0, 0, 0, 255, // len = 255 (fake for now)
+
+        0, 0, 0, 196,
+        0, 0, 0, 195,
+        0, 0, 0, 0, 0, 0, 0, 5,
+        0, 0, 0, 8,
+        1, 2, 3, 4, 11, 12, 13, 14];
+    // [21, 0, 0, 0, 0, 255, 0, 0, 0, 196, 0, 0, 0, 195, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 1, 2, 3, 4, 11, 12, 13, 14]
+    // [21, 0, 0, 0, 0, 255, 196, 0, 0, 0, 195, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 1, 2, 3, 4, 11, 12, 13, 14]
     assert_eq!(serializer.write_handle, expected);
 }
