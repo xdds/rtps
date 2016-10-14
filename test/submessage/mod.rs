@@ -1,2 +1,3 @@
 mod test_submessage_deserialize;
 mod test_submessage_serialize;
+mod test_submessage_variant_roundtrip;

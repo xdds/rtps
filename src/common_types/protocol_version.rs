@@ -27,7 +27,7 @@ impl serde::Deserialize for ProtocolVersion {
 
 impl serde::Serialize for ProtocolVersion {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: serde::Serializer {
-        let val = match *self {
+        let val : [u8; 2] = match *self {
             ProtocolVersion::VERSION_2_2 => [20,10],
             ProtocolVersion::UNKNOWN => return Err(serde::ser::Error::custom("unknown protocol version"))
         };

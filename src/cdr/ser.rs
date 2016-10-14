@@ -55,6 +55,15 @@ pub struct CdrSerializer<W> where W: Write {
     pub write_handle: W
 }
 
+impl<W> CdrSerializer<W> where W: Write {
+    pub fn new(w: W) -> Self {
+        CdrSerializer {
+            endianness: Endianness::Big,
+            write_handle: w
+        }
+    }
+}
+
 impl<W: Write> Serializer for CdrSerializer<W> {
     type Error = CdrError;
     type SeqState = ();
@@ -69,16 +78,38 @@ impl<W: Write> Serializer for CdrSerializer<W> {
         unimplemented!();
     }
 
-    fn serialize_i8(&mut self, _:i8) -> Result<(), Self::Error> {
-        unimplemented!();
+    fn serialize_i8(&mut self, val:i8) -> Result<(), Self::Error> {
+        match self.write_handle.write_i8(val) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(CdrError{
+                reason: err.description().to_string()
+            })
+        }
     }
 
     fn serialize_i16(&mut self, _:i16) -> Result<(), Self::Error> {
         unimplemented!();
     }
 
-    fn serialize_i32(&mut self, _:i32) -> Result<(), Self::Error> {
-        unimplemented!();
+    fn serialize_i32(&mut self, v:i32) -> Result<(), Self::Error> {
+        match self.endianness {
+            Endianness::Little => {
+                match self.write_handle.write_i32::<LittleEndian>(v) {
+                    Ok(_) => Ok(()),
+                    Err(err) => Err(CdrError{
+                        reason: err.description().to_string()
+                    })
+                }
+            },
+            Endianness::Big => {
+                match self.write_handle.write_i32::<BigEndian>(v) {
+                    Ok(_) => Ok(()),
+                    Err(err) => Err(CdrError{
+                        reason: err.description().to_string()
+                    })
+                }
+            }
+        }
     }
 
     fn serialize_i64(&mut self, _ /* v */: i64) -> Result<(), Self::Error> {
@@ -209,8 +240,8 @@ impl<W: Write> Serializer for CdrSerializer<W> {
         }
     }
 
-    fn serialize_seq_fixed_size(&mut self, len: usize) -> Result<(), Self::Error> {
-        self.serialize_u32(len as u32)
+    fn serialize_seq_fixed_size(&mut self, _: usize) -> Result<(), Self::Error> {
+        Ok(())
     }
 
     fn serialize_seq_elt<T>(&mut self, _: &mut Self::SeqState, value: T) -> Result<(), Self::Error> where T: Serialize {

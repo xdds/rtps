@@ -20,7 +20,7 @@ fn test_stateless_writer_heartbeat_increments_count() {
 
     let reader_entity_id : EntityId = Default::default();
 
-    let mut common_heartbeat = SubmessageVariant::HeartBeat {
+    let mut common_heartbeat = SubmessageVariant::Heartbeat {
         writer_id: Default::default(),
         reader_id: Default::default(),
         first_sn: 1,
@@ -29,13 +29,13 @@ fn test_stateless_writer_heartbeat_increments_count() {
     };
 
     let heartbeat = writer.heartbeat(reader_entity_id);
-    if let SubmessageVariant::HeartBeat{ref mut count, ..} = common_heartbeat {
+    if let SubmessageVariant::Heartbeat{ref mut count, ..} = common_heartbeat {
         *count = 0;
     }
     assert_eq!(heartbeat, common_heartbeat);
 
     let heartbeat2 = writer.heartbeat(reader_entity_id);
-    if let SubmessageVariant::HeartBeat{ref mut count, ..} = common_heartbeat {
+    if let SubmessageVariant::Heartbeat{ref mut count, ..} = common_heartbeat {
         *count = 1;
     }
     assert_eq!(heartbeat2, common_heartbeat);

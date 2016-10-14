@@ -12,6 +12,9 @@ fn test_ping_pong() {
         reader_locators: vec![
             (Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1]),None),
         ],
+        unicast_locator_list: vec![
+            Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1])
+        ],
         .. Default::default()
     });
 
@@ -39,7 +42,7 @@ fn test_ping_pong() {
         writer_task.stop();
 
         assert_eq!(writer_task.join().unwrap().iterations, 1);
-        assert_eq!(reader_task.join().unwrap().iterations, 1);
+        assert_eq!(reader_task.join().unwrap().iterations, 3);
     }
 
 }

@@ -1,41 +1,89 @@
-use serde::{ Serialize, Serializer };
+use serde::{Serialize, Serializer};
 use serde;
 
 use super::common_types::*;
 
-#[derive(Deserialize,Debug,PartialEq)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct Submessage {
     pub variant: SubmessageVariant
 }
 
 /// 8.3.4.1 Rules Followed by the Message Receiver
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum SubmessageVariant {
     // Interpreter Submessages
-    InfoDestination( GuidPrefix ),
+    InfoDestination(GuidPrefix),
     // TODO: not positive the on-wire format of a Locator_t*. Not length-prefixed?
-    InfoReply{ unicast_locator_list: LocatorList /* , multicast_locator_list: Option<LocatorList> TODO: relies on presence of multicast flag above */ },
-    InfoSource{ protocol_version: ProtocolVersion, vendor_id: VendorId, guid_prefix: GuidPrefix},
+    InfoReply {
+        unicast_locator_list: LocatorList /* , multicast_locator_list: Option<LocatorList> TODO: relies on presence of multicast flag above */
+    },
+    InfoSource {
+        protocol_version: ProtocolVersion,
+        vendor_id: VendorId,
+        guid_prefix: GuidPrefix
+    },
     InfoTimestamp(Timestamp),
 
     // Entity Submessages
-    AckNack { reader_id: EntityId, writer_id: EntityId, reader_sn_state: SequenceNumberSet, count: Count  },
-    Data { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber/*, inline_qos: Option<InlineQOS> */, serialized_payload: ArcBuffer  },
+    AckNack {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        reader_sn_state: SequenceNumberSet,
+        count: Count
+    },
+    Data {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        writer_sn: SequenceNumber/*, inline_qos: Option<InlineQOS> */,
+        serialized_payload: ArcBuffer
+    },
     // TODO: Data frag will require a 'buffer farm' concept so we can process multiple messages then form a single cache_change
-    DataFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, fragment_start_num: FragmentNumber, fragments_in_submessage: u16, data_size: u32, fragment_size: u16, /*, inline_qos: Option<InlineQOS>, */ serialized_payload: ArcBuffer },
-    Gap { reader_id: EntityId, writer_id: EntityId, gap_start: SequenceNumber, gap_list: SequenceNumberSet },
-    HeartBeat { reader_id: EntityId, writer_id: EntityId, first_sn: SequenceNumber, last_sn: SequenceNumber, count: Count },
-    HeartbeatFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, last_fragment_number: FragmentNumber, count: Count },
-    NackFrag { reader_id: EntityId, writer_id: EntityId, writer_sn: SequenceNumber, fragment_number_state: FragmentNumberSet, count: Count },
+    DataFrag {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        writer_sn: SequenceNumber,
+        fragment_start_num: FragmentNumber,
+        fragments_in_submessage: u16,
+        data_size: u32,
+        fragment_size: u16,
+        /*, inline_qos: Option<InlineQOS>, */ serialized_payload: ArcBuffer
+    },
+    Gap {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        gap_start: SequenceNumber,
+        gap_list: SequenceNumberSet
+    },
+    Heartbeat {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        first_sn: SequenceNumber,
+        last_sn: SequenceNumber,
+        count: Count
+    },
+    HeartbeatFrag {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        writer_sn: SequenceNumber,
+        last_fragment_number: FragmentNumber,
+        count: Count
+    },
+    NackFrag {
+        reader_id: EntityId,
+        writer_id: EntityId,
+        writer_sn: SequenceNumber,
+        fragment_number_state: FragmentNumberSet,
+        count: Count
+    },
     Pad
 }
 
 impl serde::Deserialize for SubmessageVariant {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
-        let kind : SubmessageId = try!(serde::Deserialize::deserialize(deserializer));
-        let _ : u8 = try!(serde::Deserialize::deserialize(deserializer));
+        let kind: SubmessageId = try!(serde::Deserialize::deserialize(deserializer));
+        let _flags : u8 = try!(serde::Deserialize::deserialize(deserializer));
         // len of message. TODO: use to confirm the proper number of bytes are read
-        let _ : u32 = try!(serde::Deserialize::deserialize(deserializer));
+        let _message_len: u32 = try!(serde::Deserialize::deserialize(deserializer));
 
         match kind {
             SubmessageId::INFO_TS => {
@@ -43,14 +91,14 @@ impl serde::Deserialize for SubmessageVariant {
                 Ok(SubmessageVariant::InfoTimestamp(try!(serde::Deserialize::deserialize(deserializer))))
             },
             SubmessageId::INFO_SRC => {
-                Ok(SubmessageVariant::InfoSource{
+                Ok(SubmessageVariant::InfoSource {
                     protocol_version: try!(serde::Deserialize::deserialize(deserializer)),
                     vendor_id: try!(serde::Deserialize::deserialize(deserializer)),
                     guid_prefix: try!(serde::Deserialize::deserialize(deserializer))
                 })
             },
             SubmessageId::INFO_REPLY => {
-                Ok(SubmessageVariant::InfoReply{
+                Ok(SubmessageVariant::InfoReply {
                     unicast_locator_list: try!(serde::Deserialize::deserialize(deserializer))
                 })
             },
@@ -59,7 +107,7 @@ impl serde::Deserialize for SubmessageVariant {
             },
             SubmessageId::INFO_REPLY_IP4 => {
                 Err(serde::Error::custom("we don't do ipv4 specialization yet"))
-//                0x0f
+                //                0x0f
             },
 
             SubmessageId::ACKNACK => {
@@ -93,7 +141,7 @@ impl serde::Deserialize for SubmessageVariant {
                 })
             },
             SubmessageId::HEARTBEAT => {
-                Ok(SubmessageVariant::HeartBeat{
+                Ok(SubmessageVariant::Heartbeat {
                     reader_id: try!(serde::Deserialize::deserialize(deserializer)),
                     writer_id: try!(serde::Deserialize::deserialize(deserializer)),
                     first_sn: try!(serde::Deserialize::deserialize(deserializer)),
@@ -111,7 +159,7 @@ impl serde::Deserialize for SubmessageVariant {
                 })
             },
             SubmessageId::GAP => {
-                Ok(SubmessageVariant::Gap{
+                Ok(SubmessageVariant::Gap {
                     reader_id: try!(serde::Deserialize::deserialize(deserializer)),
                     writer_id: try!(serde::Deserialize::deserialize(deserializer)),
                     gap_start: try!(serde::Deserialize::deserialize(deserializer)),
@@ -120,7 +168,7 @@ impl serde::Deserialize for SubmessageVariant {
             },
 
             SubmessageId::NACK_FRAG => {
-                Ok(SubmessageVariant::NackFrag{
+                Ok(SubmessageVariant::NackFrag {
                     reader_id: try!(serde::Deserialize::deserialize(deserializer)),
                     writer_id: try!(serde::Deserialize::deserialize(deserializer)),
                     writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
@@ -136,7 +184,7 @@ impl serde::Deserialize for SubmessageVariant {
 }
 
 #[allow(non_camel_case_types)]
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 enum SubmessageId {
     PAD,
     ACKNACK,
@@ -176,7 +224,7 @@ impl Serialize for SubmessageId {
 
 impl serde::Deserialize for SubmessageId {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
-        let byte : u8 = try!(serde::Deserialize::deserialize(deserializer));
+        let byte: u8 = try!(serde::Deserialize::deserialize(deserializer));
         match byte {
             0x01 => Ok(SubmessageId::PAD), /* Pad */
             0x06 => Ok(SubmessageId::ACKNACK), /* AckNack */
@@ -213,101 +261,125 @@ impl Serialize for Submessage {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: Serializer {
         match self.variant {
             SubmessageVariant::InfoTimestamp(ref ts) => {
-                try!(serializer.serialize_u8(0x09));
+                try!(SubmessageId::INFO_TS.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xFF));
                 try!(ts.serialize(serializer));
                 Ok(())
             },
-            SubmessageVariant::InfoSource{ protocol_version, vendor_id, guid_prefix } => {
-                try!(serializer.serialize_u8(0x0c));
+            SubmessageVariant::InfoSource { protocol_version, vendor_id, guid_prefix } => {
+                try!(SubmessageId::INFO_SRC.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xFF));
                 try!(protocol_version.serialize(serializer));
                 try!(vendor_id.serialize(serializer));
                 try!(guid_prefix.serialize(serializer));
                 Ok(())
             },
-//            SubmessageId::INFO_REPLY => {
-//                Ok(SubmessageVariant::InfoReply{
-//                    unicast_locator_list: try!(serde::Deserialize::deserialize(deserializer))
-//                })
-//            },
-//            SubmessageId::INFO_DST => {
-//                Ok(SubmessageVariant::InfoDestination(try!(serde::Deserialize::deserialize(deserializer))))
-//            },
-//            SubmessageId::INFO_REPLY_IP4 => {
-//                Err(serde::Error::custom("we don't do ipv4 specialization yet"))
-//                //                0x0f
-//            },
-//
-//            SubmessageId::ACKNACK => {
-//                Ok(SubmessageVariant::AckNack {
-//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    reader_sn_state: try!(serde::Deserialize::deserialize(deserializer)),
-//                    count: try!(serde::Deserialize::deserialize(deserializer)),
-//                })
-//            },
-            SubmessageVariant::Data{ reader_id, writer_id, writer_sn /*, inline_qos: Option<InlineQOS> */, ref serialized_payload } => {
-                try!(serializer.serialize_u8(0x15));
+            SubmessageVariant::InfoReply { ref unicast_locator_list } => {
+                try!(SubmessageId::INFO_REPLY.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xFF));
+
+                let mut state = try!(serializer.serialize_seq(Some(unicast_locator_list.len())));
+                for locator in unicast_locator_list {
+                    try!(serializer.serialize_seq_elt(&mut state, locator));
+                }
+                Ok(())
+            }
+            SubmessageVariant::InfoDestination(guid_prefix) => {
+                try!(SubmessageId::INFO_DST.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xFF));
+                try!(guid_prefix.serialize(serializer));
+                Ok(())
+            },
+            SubmessageVariant::AckNack{ reader_id, writer_id, reader_sn_state, count }=> {
+                try!(SubmessageId::ACKNACK.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xFF));
+
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(reader_sn_state.serialize(serializer));
+                try!(count.serialize(serializer));
+                Ok(())
+            },
+            SubmessageVariant::Data { reader_id, writer_id, writer_sn /*, inline_qos: Option<InlineQOS> */, ref serialized_payload } => {
+                try!(SubmessageId::DATA.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xDD));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(writer_sn.serialize(serializer));
                 try!(serialized_payload.serialize(serializer));
                 Ok(())
             },
-//            SubmessageId::DATA_FRAG => {
-//                Ok(SubmessageVariant::DataFrag {
-//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
-//
-//                    fragment_start_num: try!(serde::Deserialize::deserialize(deserializer)),
-//                    fragments_in_submessage: try!(serde::Deserialize::deserialize(deserializer)),
-//                    data_size: try!(serde::Deserialize::deserialize(deserializer)),
-//                    fragment_size: try!(serde::Deserialize::deserialize(deserializer)),
-//
-//                    serialized_payload: try!(serde::Deserialize::deserialize(deserializer)),
-//                })
-//            },
-            SubmessageVariant::HeartBeat { reader_id, writer_id, first_sn, last_sn, count } => {
+            SubmessageVariant::DataFrag { reader_id, writer_id, writer_sn /*, inline_qos: Option<InlineQOS> */, ref serialized_payload, fragment_start_num, fragments_in_submessage, data_size, fragment_size } => {
+                try!(SubmessageId::DATA_FRAG.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xDD));
+
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(writer_sn.serialize(serializer));
+                try!(fragment_start_num.serialize(serializer));
+                try!(fragments_in_submessage.serialize(serializer));
+                try!(data_size.serialize(serializer));
+                try!(fragment_size.serialize(serializer));
+                try!(serialized_payload.serialize(serializer));
+
+                Ok(())
+            },
+            SubmessageVariant::Gap { reader_id, writer_id, gap_start, gap_list } => {
+                try!(SubmessageId::GAP.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xEE));
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(gap_start.serialize(serializer));
+                try!(gap_list.serialize(serializer));
+                Ok(())
+            }
+            SubmessageVariant::Heartbeat { reader_id, writer_id, first_sn, last_sn, count } => {
                 try!(serializer.serialize_u8(0x07));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xEE));
                 try!(reader_id.serialize(serializer));
                 try!(writer_id.serialize(serializer));
                 try!(first_sn.serialize(serializer));
                 try!(last_sn.serialize(serializer));
                 try!(count.serialize(serializer));
                 Ok(())
+            }
+            SubmessageVariant::HeartbeatFrag{ reader_id, writer_id, writer_sn, last_fragment_number, count } => {
+                try!(SubmessageId::HEARTBEAT_FRAG.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xEE));
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(writer_sn.serialize(serializer));
+                try!(last_fragment_number.serialize(serializer));
+                try!(count.serialize(serializer));
+                Ok(())
             },
-//            SubmessageId::HEARTBEAT_FRAG => {
-//                Ok(SubmessageVariant::HeartbeatFrag {
-//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
-//                    last_fragment_number: try!(serde::Deserialize::deserialize(deserializer)),
-//                    count: try!(serde::Deserialize::deserialize(deserializer)),
-//                })
-//            },
-//            SubmessageId::GAP => {
-//                Ok(SubmessageVariant::Gap{
-//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    gap_start: try!(serde::Deserialize::deserialize(deserializer)),
-//                    gap_list: try!(serde::Deserialize::deserialize(deserializer)),
-//                })
-//            },
-//
-//            SubmessageId::NACK_FRAG => {
-//                Ok(SubmessageVariant::NackFrag{
-//                    reader_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_id: try!(serde::Deserialize::deserialize(deserializer)),
-//                    writer_sn: try!(serde::Deserialize::deserialize(deserializer)),
-//                    fragment_number_state: try!(serde::Deserialize::deserialize(deserializer)),
-//                    count: try!(serde::Deserialize::deserialize(deserializer)),
-//                })
-//            },
-//            SubmessageId::PAD => {
-//                Ok(SubmessageVariant::Pad)
-//            }
-            _ => panic!(format!("unsupported variant {:?}", self.variant))
-
+            SubmessageVariant::NackFrag{ reader_id, writer_id, writer_sn, fragment_number_state, count } => {
+                try!(SubmessageId::NACK_FRAG.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xEE));
+                try!(reader_id.serialize(serializer));
+                try!(writer_id.serialize(serializer));
+                try!(writer_sn.serialize(serializer));
+                try!(fragment_number_state.serialize(serializer));
+                try!(count.serialize(serializer));
+                Ok(())
+            },
+            SubmessageVariant::Pad => {
+                try!(SubmessageId::PAD.serialize(serializer));
+                try!(serializer.serialize_u8(0x00));
+                try!(serializer.serialize_u32(0xEE));
+                Ok(())
+            }
         }
     }
 }

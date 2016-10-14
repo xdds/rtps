@@ -12,7 +12,7 @@ use super::ReaderInitArgs;
 use super::super::HistoryCache;
 use super::super::traits::*;
 use super::super::super::common_types::*;
-use super::super::super::Message;
+use super::super::super::{ Message, SubmessageVariant };
 
 use super::super::super::cdr::{ CdrDeserializer };
 
@@ -66,16 +66,27 @@ impl SpawnableTaskTrait for StatelessReader {
         let data = &buf[0..size];
         let mut reader = io::Cursor::new(data);
 
-        let _ : Message = match serde::Deserialize::deserialize(&mut CdrDeserializer::new(&mut reader)) {
+//        panic!("data: {:?}", data);
+
+        let message : Message = match serde::Deserialize::deserialize(&mut CdrDeserializer::new(&mut reader)) {
             Ok(msg) => msg,
             Err(_) => return Err(io::Error::new(io::ErrorKind::Other, "meow"))
         };
 
         // TODO: should use the two kinds of submessage elements:
         //
-//        for submessage in message.submessages {
+        for submessage in message.submessages {
+            match submessage.variant {
+                SubmessageVariant::Heartbeat{reader_id, ..} => {
+                    panic!("sup from {:?}", reader_id)
+                },
+                other => {
+                    panic!("mother of god: {:?}", other)
+                }
+            }
+//            panic!("{:?}", submessage);
 //            history_cache.add_change(CacheChange::new(ChangeKind::ALIVE, message.));
-//        }
+        }
 
 //        panic!("{:?}", message);
 

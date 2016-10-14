@@ -35,14 +35,22 @@ impl serde::Deserialize for Locator {
                 Err(serde::Error::custom(format!("we don't support {:?}", kind)))
             }
         }
+    }
+}
 
-//        let locator : [u8; 16] = try!(serde::Deserialize::deserialize(deserializer));
-//        if locator[0..12] == [0,0,0,0, 0,0,0,0, 0,0,0,0] {
-//            panic!("sup");
-//        } else {
-//
-//        }
-//        Ok(Locator::INVALID)
+impl serde::Serialize for Locator {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(),S::Error> where S: serde::Serializer {
+        match *self {
+            Locator::KIND_UDPv4(port,locator) => {
+                try!((LocatorKind::UDPv4).serialize(serializer));
+                try!(port.serialize(serializer));
+                try!(locator.serialize(serializer));
+                Ok(())
+            },
+            _ => {
+                unimplemented!()
+            }
+        }
     }
 }
 
@@ -79,7 +87,9 @@ impl serde::Deserialize for LocatorKind {
             0 => Ok(LocatorKind::RESERVED),
             1 => Ok(LocatorKind::UDPv4),
             2 => Ok(LocatorKind::UDPv6),
-            _ => Ok(LocatorKind::INVALID),
+            _ => {
+                Ok(LocatorKind::INVALID)
+            },
         }
     }
 }
@@ -93,7 +103,7 @@ impl serde::Serialize for LocatorKind {
             _ => -1
         };
 
-        serializer.serialize_i8(val)
+        serializer.serialize_i32(val)
     }
 }
 

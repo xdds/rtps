@@ -12,7 +12,6 @@ fn deserialize_submessage() {
     };
 
     let test_cases = [
-        //
         TC {
             b: &[
                 0x09, 1, // Submessage 0 message id, endianness flag
@@ -214,7 +213,7 @@ fn deserialize_submessage() {
 
                 0, 0, 0, 101, // count
             ],
-            e: rtps::SubmessageVariant::HeartBeat {
+            e: rtps::SubmessageVariant::Heartbeat {
                 reader_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInReader },
                 writer_id: t::EntityId{ entity_key: [0,0,0], entity_kind: t::EntityKind::BuiltInWriter },
                 first_sn: 10,
@@ -264,7 +263,7 @@ fn deserialize_submessage() {
 //                0, 0, 0, 0,
             ],
             e: rtps::SubmessageVariant::Pad
-        }
+        },
 
 
     ];

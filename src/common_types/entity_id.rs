@@ -23,6 +23,7 @@ impl Default for EntityKind {
 impl serde::Deserialize for EntityKind {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
         let byte : u8 = try!(serde::Deserialize::deserialize(deserializer));
+//        panic!("byte: {:?}", byte);
         match byte {
             0xc0 => Ok(EntityKind::BuiltInUnknown),
             0xc1 => Ok(EntityKind::BuiltInParticipant),

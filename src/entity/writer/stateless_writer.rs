@@ -46,6 +46,9 @@ pub struct StatelessWriter {
 }
 
 impl StatelessWriter {
+    /// You must provide at least one entry in the unicast locator list
+    /// or it will fail to produce heartbeats.
+    /// TODO: change `new() -> Self` to `new() -> Option<Self>`
     pub fn new(init_args: WriterInitArgs) -> Self {
         StatelessWriter {
             guid: init_args.guid,
@@ -89,7 +92,7 @@ impl StatelessWriter {
         let max = self.writer_cache.get_seq_num_max().unwrap_or(0);
         let min = self.writer_cache.get_seq_num_min().unwrap_or(0);
 
-        let heartbeat = SubmessageVariant::HeartBeat {
+        let heartbeat = SubmessageVariant::Heartbeat {
             reader_id: reader_id,
             writer_id: self.guid.entity_id,
 
@@ -102,6 +105,29 @@ impl StatelessWriter {
         self.heartbeat_count += 1;
 
         heartbeat
+    }
+
+    pub fn serialize_message<'a>(buf: &'a mut [u8], message: &Message) -> Result<&'a [u8], io::Error> {
+        let position = {
+            let new_slice = &mut buf[..];
+            let writeable_buf = Cursor::new(new_slice);
+
+            let mut serializer = CdrSerializer {
+                endianness: Endianness::Big,
+                write_handle: writeable_buf
+            };
+
+            match message.serialize(&mut serializer) {
+                Ok(_) => (),
+                Err(err) => {
+                    return Err(io::Error::new(io::ErrorKind::Other, err.description()))
+                },
+            }
+
+            serializer.write_handle.position() as usize
+        };
+
+        Ok(&buf[0..position])
     }
 }
 
@@ -143,37 +169,15 @@ impl SpawnableTaskTrait for StatelessWriter {
     fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
         // TODO: `self.reader_locators.clone()` necessary because `self.heartbeat` wants mut ref.
         for (_, reader) in self.reader_locators.clone() {
-            let position = {
-                let new_slice = &mut buf[..];
-                let writeable_buf = Cursor::new(new_slice);
-
-                let mut serializer = CdrSerializer {
-                    endianness: Endianness::Big,
-                    write_handle: writeable_buf
-                };
-
-                /* TODO: move to a transaction where the count only goes up once. for now we increment on each host
-                at the writer level. Perhaps we could do count at the ReaderLocator level? */
-                let heartbeat = match reader {
-                    Some(reader) => self.heartbeat(reader),
-                    None => self.heartbeat(EntityId::builtin_unknown())
-                };
-
-                let message = Message::new(vec![ Submessage{ variant: heartbeat } ]);
-
-                match message.serialize(&mut serializer) {
-                    Ok(_) => (),
-                    Err(err) => {
-                        return Err(io::Error::new(io::ErrorKind::Other, err.description()))
-                    },
-                }
-
-                serializer.write_handle.position() as usize
+            /* TODO: move to a transaction where the count only goes up once. for now we increment on each host
+            at the writer level.Perhaps we could do count at the ReaderLocator level? */
+            let heartbeat = match reader {
+                Some(reader) => self.heartbeat(reader),
+                None => self.heartbeat(EntityId::builtin_unknown())
             };
 
-            let used_buf : &[u8] = &buf[0..position];
-
-            for location in &mut self.unicast_locator_list {
+            for location in &self.unicast_locator_list {
+                let used_buf = try!(StatelessWriter::serialize_message(buf, &Message::new(vec![Submessage{ variant: heartbeat.clone() }])));
                 try!(location.write(used_buf));
             }
         }
