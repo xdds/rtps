@@ -1,6 +1,6 @@
 use std::thread;
 use std::net::UdpSocket;
-use std::sync::{ Arc };
+use std::sync::{ Arc, Condvar, Mutex };
 use std::sync::atomic::{ Ordering };
 use std::io;
 
@@ -27,7 +27,7 @@ pub struct StatelessReader {
     socket: Option<Arc<UdpSocket>>,
 
     reader_cache: HistoryCache,
-
+    reader_cache_condvar: Arc<(Mutex<bool>,Condvar)>,
 
 }
 
@@ -42,7 +42,9 @@ impl StatelessReader {
 
             writer_locators: args.writer_locator_list,
             socket: None,
+
             reader_cache: HistoryCache::new(),
+            reader_cache_condvar: Arc::new((Mutex::new(false), Condvar::new())),
         };
 
         Ok(reader)
@@ -50,6 +52,19 @@ impl StatelessReader {
 
     pub fn reader_cache(&self) -> &HistoryCache {
         &self.reader_cache
+    }
+
+    pub fn reader_cache_condvar(&self) -> Arc<(Mutex<bool>, Condvar)> {
+        self.reader_cache_condvar.clone()
+    }
+
+    pub fn wait_for_reader_cache_change(&self) {
+        let &(ref cvar_mutex, ref cvar) = &*self.reader_cache_condvar();
+
+        let mut cvar_guard = cvar_mutex.lock().unwrap();
+        while !*cvar_guard {
+            cvar_guard = cvar.wait(cvar_guard).unwrap();
+        }
     }
 }
 
@@ -115,6 +130,10 @@ impl SpawnableTaskTrait for StatelessReader {
 
                     let change = CacheChange::new(ChangeKind::ALIVE, writer_guid, InstanceHandle::new(), 0, serialized_payload );
                     self.reader_cache.add_change(&change);
+
+                    let mut has_data = self.reader_cache_condvar.0.lock().unwrap();
+                    *has_data = true;
+                    self.reader_cache_condvar.1.notify_all();
                 },
                 other => {
                     panic!("mother of god: {:?}", other)

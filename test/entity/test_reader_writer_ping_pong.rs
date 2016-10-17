@@ -21,6 +21,8 @@ fn test_ping_pong() {
         writer_locator_list: writer_locator_list,
         ..Default::default()
     }).unwrap();
+//    let &(ref cvar_mutex, ref cvar) = &*reader.reader_cache_condvar();
+
     reader.start_listening().unwrap();
 
     writer.reader_locators.push((reader.unicast_locator_list()[0].clone(), Some(reader.guid().entity_id)));
@@ -33,7 +35,8 @@ fn test_ping_pong() {
     let syncy_reader = Arc::new(Mutex::new(reader));
     let reader_task = SpawnableTaskTrait::spawn(syncy_reader.clone());
 
-    thread::sleep(time::Duration::from_millis(1)); // Give them time to exchange messages
+//    syncy_reader.lock().unwrap().wait_for_reader_cache_change();
+    thread::sleep(time::Duration::from_millis(11)); // Give them time to exchange messages
 
     // Check that data
     {
