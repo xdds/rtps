@@ -16,6 +16,7 @@ impl HistoryCacheTrait for HistoryCache {
         Default::default()
     }
 
+    // TODO: re-assess why I do a clone of this? For ease of testing?
     fn add_change(&mut self, change: &CacheChange) -> HistoryCacheResult {
         let copy = change.clone();
         self.changes.push(copy);

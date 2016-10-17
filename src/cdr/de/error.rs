@@ -49,3 +49,9 @@ impl From<std::io::Error> for CdrDeserializerError {
         }
     }
 }
+
+impl Into<std::io::Error> for CdrDeserializerError {
+    fn into(self) -> std::io::Error {
+        std::io::Error::new(std::io::ErrorKind::Other, self.thing)
+    }
+}

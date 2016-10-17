@@ -9,40 +9,72 @@ use rtps::*;
 fn test_ping_pong() {
     let mut writer = StatelessWriter::new(WriterInitArgs{
         guid: Guid::new(),
-        reader_locators: vec![
-            (Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1]),None),
-        ],
-        unicast_locator_list: vec![
-            Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1])
-        ],
+        reader_locators: vec![],
+        unicast_locator_list: vec![],
         .. Default::default()
     });
+    writer.start_listening().unwrap();
+    let writer_locator_list = vec![ (writer.unicast_locator_list()[0].clone(), Some(writer.guid().entity_id)) ];
 
-    writer.new_change(ChangeKind::ALIVE,
-                      InstanceHandle::new(),
-                      ArcBuffer::from_vec(vec![1,2,3,4])
-    );
-
-    let writer_task = SpawnableTaskTrait::spawn(Arc::new(Mutex::new(writer)));
-    writer_task.stop();
-
-    let reader = StatelessReader::new(ReaderInitArgs{
+    let mut reader = StatelessReader::new(ReaderInitArgs{
         guid: Guid::new(),
-        unicast_locator_list: vec![
-            Locator::KIND_UDPv4(8000, [0,0,0,0, 0,0,0,0, 0,0,0,0, 127,0,0,1])
-        ],
+        writer_locator_list: writer_locator_list,
         .. Default::default()
     }).unwrap();
+    reader.start_listening().unwrap();
+
+    writer.reader_locators.push( ( reader.unicast_locator_list()[0].clone(), Some(reader.guid().entity_id) ));
+    writer.new_change(ChangeKind::ALIVE,
+                      InstanceHandle::new(),
+                      ArcBuffer::from_vec(vec![1,2,3,4]));
+    let syncy_writer = Arc::new(Mutex::new(writer));
+    let writer_task = SpawnableTaskTrait::spawn(syncy_writer.clone());
 
     let syncy_reader = Arc::new(Mutex::new(reader));
+    let reader_task = SpawnableTaskTrait::spawn(syncy_reader.clone());
+
+    thread::sleep(time::Duration::from_millis(1)); // Give them time to exchange messages
+
+    // Check that data
     {
-        let reader_task = SpawnableTaskTrait::spawn(syncy_reader);
-        thread::sleep(time::Duration::from_millis(10));
+        let reader = syncy_reader.lock().unwrap();
+        let cache = reader.reader_cache();
+
+        let changes_copy: Vec<ArcBuffer> = cache.iter().map(|c| c.data()).collect();
+        assert_eq!(changes_copy, vec![ArcBuffer::from_vec(vec![1,2,3,4])]);
+    }
+
+    // Send another message
+    {
+        let mut writer = syncy_writer.lock().unwrap();
+
+        writer.new_change(ChangeKind::ALIVE,
+                          InstanceHandle::new(),
+                          ArcBuffer::from_vec(vec![4,3,2,1]));
+    }
+
+    thread::sleep(time::Duration::from_millis(1)); // Give them time to exchange messages
+
+    // Check we have all three messages (our history cache is dumb)
+    {
+        let reader = syncy_reader.lock().unwrap();
+        let cache = reader.reader_cache();
+
+        let changes_copy: Vec<ArcBuffer> = cache.iter().map(|c| c.data()).collect();
+        assert_eq!(changes_copy, vec![
+            ArcBuffer::from_vec(vec![1,2,3,4]),
+            ArcBuffer::from_vec(vec![1,2,3,4]),
+            ArcBuffer::from_vec(vec![4,3,2,1])
+        ]);
+    }
+
+    // Turn it all off and count how many times we spun around while
+    // taking in to account that each socket read has 10ms timeout (hard-coded for now)
+    {
         reader_task.stop();
         writer_task.stop();
 
-        assert_eq!(writer_task.join().unwrap().iterations, 1);
-        assert_eq!(reader_task.join().unwrap().iterations, 3);
+        assert_eq!(writer_task.join().unwrap().iterations, 2);
+        assert_eq!(reader_task.join().unwrap().iterations, 7);
     }
-
 }

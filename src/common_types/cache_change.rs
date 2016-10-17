@@ -1,12 +1,12 @@
 use super::*;
 use super::super::{ Submessage, SubmessageVariant };
 
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,)]
 pub struct CacheChange {
     kind: ChangeKind,
-    writer_guid: Guid,
+    pub writer_guid: Guid,
     instance_handle: InstanceHandle,
-    sequence_number: SequenceNumber,
+    pub sequence_number: SequenceNumber,
     data: ArcBuffer
 }
 
@@ -45,5 +45,9 @@ impl CacheChange {
 
             }
         }
+    }
+
+    pub fn data(&self) -> ArcBuffer {
+        self.data.clone()
     }
 }

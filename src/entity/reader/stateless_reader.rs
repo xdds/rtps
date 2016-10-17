@@ -1,5 +1,4 @@
 use std::thread;
-use std::time;
 use std::net::UdpSocket;
 use std::sync::{ Arc };
 use std::sync::atomic::{ Ordering };
@@ -23,9 +22,13 @@ pub struct StatelessReader {
 
     handle: Option<SpawnableTaskHandle>,
 
+    // TODO: make private and rely on discovery
+    pub writer_locators: Vec<(Locator, Option<EntityId>)>,
     socket: Option<Arc<UdpSocket>>,
 
-    reader_cache: HistoryCache
+    reader_cache: HistoryCache,
+
+
 }
 
 impl StatelessReader {
@@ -36,19 +39,17 @@ impl StatelessReader {
             multicast_locator_list: args.multicast_locator_list,
 
             handle: None,
+
+            writer_locators: args.writer_locator_list,
             socket: None,
             reader_cache: HistoryCache::new(),
         };
 
-        try!(reader.start_listening());
         Ok(reader)
     }
 
-    fn start_listening(&mut self) -> io::Result<()> {
-        let listener = try!(UdpSocket::bind("127.0.0.1:9093"));
-        try!(listener.set_read_timeout(Some(time::Duration::from_millis(100))));
-        self.socket = Some(Arc::new(listener));
-        Ok(())
+    pub fn reader_cache(&self) -> &HistoryCache {
+        &self.reader_cache
     }
 }
 
@@ -57,38 +58,71 @@ impl ReaderTrait for StatelessReader {
 
 impl SpawnableTaskTrait for StatelessReader {
     fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
-        let socket = match self.socket {
-            Some(ref sock) => sock,
-            None => unreachable!()
+        for writer_locator in self.writer_locators.iter() {
+            if writer_locator.1.is_none() {
+                panic!("I don't yet handle resolving their entity id")
+            }
+        }
+
+        let message : Message = {
+            let socket = match self.socket {
+                Some(ref sock) => sock,
+                None => unreachable!()
+            };
+
+            let (size, /* socketAddr */ _) = try!(socket.recv_from(buf));
+            let data = &buf[0..size];
+            let mut reader = io::Cursor::new(data);
+
+            match serde::Deserialize::deserialize(&mut CdrDeserializer::new(&mut reader)) {
+                Ok(msg) => msg,
+
+                // TODO: wouldn't it be neat to just do "Err(err)" becomes "err" and just call "err.into()"
+                Err(err) => return Err(err.into())
+            }
         };
 
-        let (size, /* socketAddr */ _) = try!(socket.recv_from(buf));
-        let data = &buf[0..size];
-        let mut reader = io::Cursor::new(data);
-
-//        panic!("data: {:?}", data);
-
-        let message : Message = match serde::Deserialize::deserialize(&mut CdrDeserializer::new(&mut reader)) {
-            Ok(msg) => msg,
-            Err(_) => return Err(io::Error::new(io::ErrorKind::Other, "meow"))
-        };
 
         // TODO: should use the two kinds of submessage elements:
         //
+        let mut src_guid_prefix = None;
         for submessage in message.submessages {
             match submessage.variant {
-                SubmessageVariant::Heartbeat{reader_id, ..} => {
-//                    panic!("sup from {:?}", reader_id)
+                SubmessageVariant::Heartbeat{ writer_id, first_sn, ..} => {
+                    // We can ask the reader's HistoryCache for all values missing:
+
+                    let mut set = SequenceNumberSet::new();
+                    set.base = first_sn;
+
+                    for change in self.reader_cache.iter() {
+                        // TODO: construct full guid using guid pulled from previous submessages
+                        if change.writer_guid.entity_id != writer_id || change.sequence_number < first_sn {
+                            continue
+                        }
+
+                        try!(set.mark(change.sequence_number));
+                    }
+                    // Writer requires a response, let's do it immediately
+                },
+                SubmessageVariant::InfoSource { guid_prefix, .. } => {
+                    src_guid_prefix = Some(guid_prefix);
+                },
+                SubmessageVariant::Data{ reader_id, writer_id, writer_sn, serialized_payload } => {
+                    let writer_guid = Guid {
+                        guid_prefix: src_guid_prefix.unwrap(),
+                        entity_id: writer_id
+                    };
+
+                    let change = CacheChange::new(ChangeKind::ALIVE, writer_guid, InstanceHandle::new(), 0, serialized_payload );
+                    self.reader_cache.add_change(&change);
                 },
                 other => {
-//                    panic!("mother of god: {:?}", other)
+                    panic!("mother of god: {:?}", other)
                 }
             }
 //            panic!("{:?}", submessage);
 //            history_cache.add_change(CacheChange::new(ChangeKind::ALIVE, message.));
         }
-
-//        panic!("{:?}", message);
 
         Ok(())
     }
@@ -121,11 +155,19 @@ impl EndpointTrait for StatelessReader {
         TopicKind::NO_KEY
     }
 
+    fn set_socket(&mut self, sock: Arc<UdpSocket>) {
+        self.socket = Some(sock);
+    }
+
     fn unicast_locator_list(&self) -> &LocatorList {
         &self.unicast_locator_list
     }
 
-    fn multicast_locator_list(&self) -> &LocatorList {
-        &self.multicast_locator_list
+    fn mut_unicast_locator_list(&mut self) -> &mut LocatorList {
+        &mut self.unicast_locator_list
+    }
+
+    fn multicast_locator_list(&mut self) -> &mut LocatorList {
+        &mut self.multicast_locator_list
     }
 }

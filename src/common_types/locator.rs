@@ -7,7 +7,7 @@ pub type LocatorAddress = [u8; 16];
 pub type LocatorPort = u32;
 
 #[allow(non_camel_case_types)]
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Locator {
     INVALID,
     KIND_INVALID,
@@ -39,9 +39,9 @@ impl serde::Deserialize for Locator {
 }
 
 impl serde::Serialize for Locator {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(),S::Error> where S: serde::Serializer {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error> where S: serde::Serializer {
         match *self {
-            Locator::KIND_UDPv4(port,locator) => {
+            Locator::KIND_UDPv4(port, locator) => {
                 try!((LocatorKind::UDPv4).serialize(serializer));
                 try!(port.serialize(serializer));
                 try!(locator.serialize(serializer));
@@ -55,9 +55,17 @@ impl serde::Serialize for Locator {
 }
 
 impl Locator {
+    pub fn to_str(& self) -> String {
+        match self {
+            &Locator::KIND_UDPv4(port, addr) => format!("{}.{}.{}.{}:{}", addr[12], addr[13], addr[14], addr[15], port),
+            _ => "no se".to_owned()
+
+        }
+    }
+
     pub fn write(&self, buf: &[u8]) -> io::Result<()> {
         let conn = try!(UdpSocket::bind("0.0.0.0:0"));
-        try!(conn.connect("127.0.0.1:9093"));
+        try!(conn.connect(&self.to_str()[..]));
         match conn.send(buf) {
             Ok(_) => Ok(()),
             Err(err) => Err(err)
@@ -65,14 +73,18 @@ impl Locator {
     }
 }
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq, Debug)]
 enum LocatorKind {
-    INVALID, // = -1
-//    ADDRESS_INVALID, // {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-//    PORT_INVALID, // 0
-    RESERVED, // 0
-    UDPv4, // 1
-    UDPv6, // 2
+    INVALID,
+    // = -1
+    //    ADDRESS_INVALID, // {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+    //    PORT_INVALID, // 0
+    RESERVED,
+    // 0
+    UDPv4,
+    // 1
+    UDPv6,
+    // 2
 
     // #define LOCATOR_PORT_INVALID 0
     // #define LOCATOR_KIND_RESERVED 0
@@ -82,7 +94,7 @@ enum LocatorKind {
 
 impl serde::Deserialize for LocatorKind {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> where D: serde::Deserializer {
-        let kind : i32 = try!(serde::Deserialize::deserialize(deserializer));
+        let kind: i32 = try!(serde::Deserialize::deserialize(deserializer));
         match kind {
             0 => Ok(LocatorKind::RESERVED),
             1 => Ok(LocatorKind::UDPv4),
