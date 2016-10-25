@@ -1,6 +1,7 @@
 use std::{ thread };
 
 use rtps::common_types::*;
+use rtps::sync::Monitor;
 use rtps::*;
 
 #[test]

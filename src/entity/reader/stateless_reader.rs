@@ -11,6 +11,7 @@ use super::ReaderInitArgs;
 use super::super::HistoryCache;
 use super::super::traits::*;
 use super::super::super::common_types::*;
+use super::super::super::sync::Monitor;
 use super::super::super::{ Message, SubmessageVariant };
 
 use super::super::super::cdr::{ CdrDeserializer };

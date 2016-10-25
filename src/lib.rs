@@ -25,6 +25,7 @@ extern crate byteorder;
 // mod only exposed
 pub mod cdr;
 pub mod common_types;
+pub mod sync;
 
 // flattened expose
 pub mod entity;

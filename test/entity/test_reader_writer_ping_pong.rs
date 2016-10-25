@@ -1,5 +1,4 @@
 use std::default::Default;
-use std::{thread, time};
 use std::sync::{Arc, Mutex};
 
 use rtps::common_types::*;
@@ -21,7 +20,7 @@ fn test_ping_pong() {
         writer_locator_list: writer_locator_list,
         ..Default::default()
     }).unwrap();
-    let reader_monitor = reader.reader_cache();
+    let mut reader_monitor = reader.reader_cache();
 
     reader.start_listening().unwrap();
 
@@ -43,6 +42,8 @@ fn test_ping_pong() {
         assert_eq!(changes_copy, vec![ArcBuffer::from_vec(vec![1,2,3,4])]);
     }
 
+    reader_monitor.reset().unwrap(); // not cool. wouldn't it be nice to auto-reset when all readers have read?
+
     // Send another message
     {
         let mut writer = syncy_writer.lock().unwrap();
@@ -52,9 +53,8 @@ fn test_ping_pong() {
                           ArcBuffer::from_vec(vec![4,3,2,1]));
     }
 
-    thread::sleep(time::Duration::from_millis(11)); // Give them time to exchange messages
 
-    // Check we have all three messages (our history cache is dumb)
+    // Check we have all three messages (our history cache is dumb and sends 1 + 1+2)
     {
         reader_monitor.wait().unwrap();
         let cache = reader_monitor.lock().unwrap();
@@ -75,7 +75,7 @@ fn test_ping_pong() {
 
         // Getting a little too complicated to count cycles... used to work
         // when the implementation was so bad :)
-        //        assert_eq!(writer_task.join().unwrap().iterations, 3);
-        //        assert_eq!(reader_task.join().unwrap().iterations, 8);
+        assert_eq!(writer_task.join().unwrap().iterations, 2);
+        assert_eq!(reader_task.join().unwrap().iterations, 6);
     }
 }
