@@ -9,6 +9,8 @@
 #![feature(plugin)]
 #![plugin(clippy)]
 #![allow(len_without_is_empty)]
+#![allow(mutex_atomic)] // TODO: comment out and address AtomicBools
+
 
 // Serde specific settings
 extern crate serde;

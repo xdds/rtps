@@ -1,6 +1,6 @@
 [package]
 name = "rtps"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Xavier Lange <xrlange@gmail.com>"]
 license = "MIT"
 description = "OMG RTPS 2.2"

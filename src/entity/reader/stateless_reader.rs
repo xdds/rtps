@@ -1,6 +1,6 @@
 use std::thread;
 use std::net::UdpSocket;
-use std::sync::{ Arc, Condvar, Mutex };
+use std::sync::{ Arc };
 use std::sync::atomic::{ Ordering };
 use std::io;
 
@@ -26,14 +26,12 @@ pub struct StatelessReader {
     pub writer_locators: Vec<(Locator, Option<EntityId>)>,
     socket: Option<Arc<UdpSocket>>,
 
-    reader_cache: HistoryCache,
-    reader_cache_condvar: Arc<(Mutex<bool>,Condvar)>,
-
+    reader_cache: Monitor<HistoryCache>,
 }
 
 impl StatelessReader {
     pub fn new(args: ReaderInitArgs) -> io::Result<Self> {
-        let mut reader = StatelessReader {
+        let reader = StatelessReader {
             guid: args.guid,
             unicast_locator_list: args.unicast_locator_list,
             multicast_locator_list: args.multicast_locator_list,
@@ -43,28 +41,14 @@ impl StatelessReader {
             writer_locators: args.writer_locator_list,
             socket: None,
 
-            reader_cache: HistoryCache::new(),
-            reader_cache_condvar: Arc::new((Mutex::new(false), Condvar::new())),
+            reader_cache: Monitor::new(HistoryCache::new()),
         };
 
         Ok(reader)
     }
 
-    pub fn reader_cache(&self) -> &HistoryCache {
-        &self.reader_cache
-    }
-
-    pub fn reader_cache_condvar(&self) -> Arc<(Mutex<bool>, Condvar)> {
-        self.reader_cache_condvar.clone()
-    }
-
-    pub fn wait_for_reader_cache_change(&self) {
-        let &(ref cvar_mutex, ref cvar) = &*self.reader_cache_condvar();
-
-        let mut cvar_guard = cvar_mutex.lock().unwrap();
-        while !*cvar_guard {
-            cvar_guard = cvar.wait(cvar_guard).unwrap();
-        }
+    pub fn reader_cache(&self) -> Monitor<HistoryCache> {
+        self.reader_cache.clone()
     }
 }
 
@@ -73,7 +57,7 @@ impl ReaderTrait for StatelessReader {
 
 impl SpawnableTaskTrait for StatelessReader {
     fn werk(&mut self, buf: &mut [u8]) -> io::Result<()> {
-        for writer_locator in self.writer_locators.iter() {
+        for writer_locator in &self.writer_locators {
             if writer_locator.1.is_none() {
                 panic!("I don't yet handle resolving their entity id")
             }
@@ -97,50 +81,54 @@ impl SpawnableTaskTrait for StatelessReader {
             }
         };
 
-
         // TODO: should use the two kinds of submessage elements:
         //
-        let mut src_guid_prefix = None;
-        for submessage in message.submessages {
-            match submessage.variant {
-                SubmessageVariant::Heartbeat{ writer_id, first_sn, ..} => {
-                    // We can ask the reader's HistoryCache for all values missing:
+        let mut had_data = false;
+        {
+            let mut reader_cache = self.reader_cache.lock().unwrap();
 
-                    let mut set = SequenceNumberSet::new();
-                    set.base = first_sn;
+            let mut src_guid_prefix = None;
+            for submessage in message.submessages {
+                match submessage.variant {
+                    SubmessageVariant::Heartbeat { writer_id, first_sn, .. } => {
+                        // We can ask the reader's HistoryCache for all values missing:
 
-                    for change in self.reader_cache.iter() {
-                        // TODO: construct full guid using guid pulled from previous submessages
-                        if change.writer_guid.entity_id != writer_id || change.sequence_number < first_sn {
-                            continue
+                        let mut set = SequenceNumberSet::new();
+                        set.base = first_sn;
+
+                        for change in reader_cache.iter() {
+                            // TODO: construct full guid using guid pulled from previous submessages
+                            if change.writer_guid.entity_id != writer_id || change.sequence_number < first_sn {
+                                continue
+                            }
+
+                            try!(set.mark(change.sequence_number));
                         }
+                        // Writer requires a response, let's do it immediately
+                    },
+                    SubmessageVariant::InfoSource { guid_prefix, .. } => {
+                        src_guid_prefix = Some(guid_prefix);
+                    },
+                    SubmessageVariant::Data { /* reader_id, */ writer_id, /* writer_sn, */ serialized_payload, .. } => {
+                        let writer_guid = Guid {
+                            guid_prefix: src_guid_prefix.unwrap(),
+                            entity_id: writer_id
+                        };
 
-                        try!(set.mark(change.sequence_number));
+                        let change = CacheChange::new(ChangeKind::ALIVE, writer_guid, InstanceHandle::new(), 0, serialized_payload);
+
+                        reader_cache.add_change(&change);
+                        had_data = true;
+                    },
+                    other => {
+                        panic!("mother of god: {:?}", other)
                     }
-                    // Writer requires a response, let's do it immediately
-                },
-                SubmessageVariant::InfoSource { guid_prefix, .. } => {
-                    src_guid_prefix = Some(guid_prefix);
-                },
-                SubmessageVariant::Data{ reader_id, writer_id, writer_sn, serialized_payload } => {
-                    let writer_guid = Guid {
-                        guid_prefix: src_guid_prefix.unwrap(),
-                        entity_id: writer_id
-                    };
-
-                    let change = CacheChange::new(ChangeKind::ALIVE, writer_guid, InstanceHandle::new(), 0, serialized_payload );
-                    self.reader_cache.add_change(&change);
-
-                    let mut has_data = self.reader_cache_condvar.0.lock().unwrap();
-                    *has_data = true;
-                    self.reader_cache_condvar.1.notify_all();
-                },
-                other => {
-                    panic!("mother of god: {:?}", other)
                 }
             }
-//            panic!("{:?}", submessage);
-//            history_cache.add_change(CacheChange::new(ChangeKind::ALIVE, message.));
+        }
+
+        if had_data {
+            self.reader_cache.wakeup_all();
         }
 
         Ok(())

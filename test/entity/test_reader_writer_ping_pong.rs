@@ -21,7 +21,7 @@ fn test_ping_pong() {
         writer_locator_list: writer_locator_list,
         ..Default::default()
     }).unwrap();
-//    let &(ref cvar_mutex, ref cvar) = &*reader.reader_cache_condvar();
+    let reader_monitor = reader.reader_cache();
 
     reader.start_listening().unwrap();
 
@@ -35,13 +35,9 @@ fn test_ping_pong() {
     let syncy_reader = Arc::new(Mutex::new(reader));
     let reader_task = SpawnableTaskTrait::spawn(syncy_reader.clone());
 
-//    syncy_reader.lock().unwrap().wait_for_reader_cache_change();
-    thread::sleep(time::Duration::from_millis(11)); // Give them time to exchange messages
-
-    // Check that data
     {
-        let reader = syncy_reader.lock().unwrap();
-        let cache = reader.reader_cache();
+        reader_monitor.wait().unwrap();
+        let cache = reader_monitor.lock().unwrap();
 
         let changes_copy: Vec<ArcBuffer> = cache.iter().map(|c| c.data()).collect();
         assert_eq!(changes_copy, vec![ArcBuffer::from_vec(vec![1,2,3,4])]);
@@ -60,8 +56,8 @@ fn test_ping_pong() {
 
     // Check we have all three messages (our history cache is dumb)
     {
-        let reader = syncy_reader.lock().unwrap();
-        let cache = reader.reader_cache();
+        reader_monitor.wait().unwrap();
+        let cache = reader_monitor.lock().unwrap();
 
         let changes_copy: Vec<ArcBuffer> = cache.iter().map(|c| c.data()).collect();
         assert_eq!(changes_copy, vec![

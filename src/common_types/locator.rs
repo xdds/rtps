@@ -56,8 +56,8 @@ impl serde::Serialize for Locator {
 
 impl Locator {
     pub fn to_str(& self) -> String {
-        match self {
-            &Locator::KIND_UDPv4(port, addr) => format!("{}.{}.{}.{}:{}", addr[12], addr[13], addr[14], addr[15], port),
+        match *self {
+            Locator::KIND_UDPv4(port, addr) => format!("{}.{}.{}.{}:{}", addr[12], addr[13], addr[14], addr[15], port),
             _ => "no se".to_owned()
 
         }

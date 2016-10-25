@@ -1,8 +1,9 @@
-use std::default::Default;
+//use std::default::Default;
 use std::slice::Iter;
+//use std::sync;
 
 use super::super::common_types::*;
-use super::{ HistoryCacheTrait, HistoryCacheResult };
+use super::*;
 
 #[derive(Default,Debug)]
 pub struct HistoryCache {
@@ -13,10 +14,12 @@ const NOT_FOUND_ERR: &'static str = "not found";
 
 impl HistoryCacheTrait for HistoryCache {
     fn new() -> Self {
-        Default::default()
+        HistoryCache {
+            changes: vec![]
+        }
     }
 
-    // TODO: re-assess why I do a clone of this? For ease of testing?
+    // TODO: re-assess why I do a clone? For ease of testing?
     fn add_change(&mut self, change: &CacheChange) -> HistoryCacheResult {
         let copy = change.clone();
         self.changes.push(copy);
@@ -60,4 +63,6 @@ impl HistoryCacheTrait for HistoryCache {
     fn iter(&self) -> Iter<CacheChange> {
         self.changes.iter()
     }
+
+    // Monitor-based stuff (moved to here so
 }
