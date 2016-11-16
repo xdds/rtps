@@ -1,17 +1,17 @@
 #!/bin/bash
 set -ex
 
-path_to_executable=$(which brew)
-if [ -x "$path_to_executable" ] ; then
-    boost_installed=$(brew ls boost)
-    if [[ $? == 1 ]]; then
-        $(brew update && brew install boost)
-        exit 1
-    fi
-else
-    echo "Am I in $TRAVIS?"
-    # noop, use apt packages in travis
-fi
+#path_to_executable=$(which brew)
+#if [ -x "$path_to_executable" ] ; then
+#    boost_installed=$(brew ls boost)
+#    if [[ $? == 1 ]]; then
+#        $(brew update && brew install boost)
+#        exit 1
+#    fi
+#else
+#    echo "Am I in $TRAVIS?"
+#    # noop, use apt packages in travis
+#fi
 
 FAST_RTPS_TAG=v1.3.1
 FAST_CDR_TAG=v1.0.6
