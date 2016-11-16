@@ -9,8 +9,7 @@ if [ -x "$path_to_executable" ] ; then
         exit 1
     fi
 else
-    echo "Sorry, only support OSX for now."
-    exit 1
+    # noop, use apt packages in travis
 fi
 
 FAST_RTPS_TAG=v1.3.1

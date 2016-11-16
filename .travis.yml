@@ -4,3 +4,10 @@ rust:
 #  - stable
 #  - beta
   - nightly
+addons:
+  apt:
+    packages:
+    - cmake
+    - libboost-all-dev
+before_script:
+  - cd test/fastrtps && ./build.sh && cd ping_pong && cmake . && make
