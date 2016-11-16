@@ -1,5 +1,5 @@
 sudo: false # run in a docker container
-dist: trusty
+dist: trusty # required for cmake version for fast-rtps
 language: rust
 rust:
 #  - stable

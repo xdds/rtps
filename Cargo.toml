@@ -14,7 +14,10 @@ doctest = false
 "net2" = "0.2.*"
 "serde" = "0.8"
 "serde_derive" = "0.8"
-"clippy" = "0.0.*"
+clippy = {version = "*", optional = true}
+
+[features]
+default = []
 
 # Broken in nightly
 # [dev-dependencies]
