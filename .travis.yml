@@ -1,4 +1,5 @@
 sudo: false # run in a docker container
+dist: trusty
 language: rust
 rust:
 #  - stable
