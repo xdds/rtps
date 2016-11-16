@@ -5,9 +5,13 @@
 #![feature(type_ascription)]
 #![feature(rustc_attrs)]
 
+// TODO: big deal to not have for stable!
+#![feature(integer_atomics)]
+
 // Clippy specific settings
-#![feature(plugin)]
-#![plugin(clippy)]
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
+
 #![allow(len_without_is_empty)]
 #![allow(mutex_atomic)] // TODO: comment out and address AtomicBools
 
