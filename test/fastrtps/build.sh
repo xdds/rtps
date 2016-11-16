@@ -27,7 +27,7 @@ pushd Fast-RTPS
     fi
 
     cmake . -DEPROSIMA_BUILD=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install
-    make
+    make -j 4
     make install
 popd
 
