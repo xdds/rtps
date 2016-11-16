@@ -4,7 +4,7 @@ language: rust
 rust:
 #  - stable
 #  - beta
-  - nightly
+  - nightly-2016-11-06
 addons:
   apt:
     packages:
