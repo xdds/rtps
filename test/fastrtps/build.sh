@@ -9,6 +9,7 @@ if [ -x "$path_to_executable" ] ; then
         exit 1
     fi
 else
+    echo "Am I in $TRAVIS?"
     # noop, use apt packages in travis
 fi
 
@@ -17,6 +18,9 @@ FAST_CDR_TAG=v1.0.6
 if [[ ! -d Fast-RTPS ]]; then
     git clone https://github.com/eProsima/Fast-RTPS.git
 fi
+
+echo "Pushing to Fast-RTPS"
+
 pushd Fast-RTPS
     if [[ ! $(git branch | grep "* $FAST_RTPS_TAG") ]]; then
         git checkout tags/$FAST_RTPS_TAG -b $FAST_RTPS_TAG
