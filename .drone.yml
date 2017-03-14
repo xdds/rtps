@@ -1,0 +1,9 @@
+# http://readme.drone.io/0.5/usage/repository/configuration/
+pipeline:
+  publish:
+    image: registry.tureus.com/iot:base
+    repo: registry.tureus.com/iot:latest
+    commands:
+    - npm install
+    when:
+      event: tag
