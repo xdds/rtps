@@ -8,7 +8,7 @@ pub struct CdrSeqVisitor<'a, T> where T: Sized + 'a + serde::Deserializer  {
 
 impl<'a,T> CdrSeqVisitor<'a,T> where T: serde::Deserializer {
     pub fn new(t: &'a mut T, len: usize, debug: bool) -> Self {
-        CdrSeqVisitor{ deserializer: t, len: len, debug: debug }
+        CdrSeqVisitor{ deserializer: t, len, debug }
     }
 }
 

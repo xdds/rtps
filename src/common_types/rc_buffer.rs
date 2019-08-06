@@ -19,8 +19,10 @@ impl ArcBuffer {
     }
 
     pub fn len(&self) -> usize {
-        (self.buf.borrow() : &Vec<u8>).len()
+        self.buf.len()
     }
+
+    pub fn is_empty(&self) -> bool { self.len() == 0 }
 }
 
 impl serde::Deserialize for ArcBuffer {

@@ -30,7 +30,7 @@ pub trait EndpointTrait : EntityTrait {
             big_addr[13] = addr_bytes[1];
             big_addr[14] = addr_bytes[2];
             big_addr[15] = addr_bytes[3];
-            Locator::KIND_UDPv4(addr.port() as u32, big_addr)
+            Locator::KIND_UDPv4(u32::from(addr.port()), big_addr)
         } else {
             return Err(io::Error::new(io::ErrorKind::Other, "no valid addr".to_owned()));
         };

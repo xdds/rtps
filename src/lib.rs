@@ -1,19 +1,11 @@
 // TODO: for a good time, comment this line and let rust point out all the extra stuff
 #![allow(dead_code)]
 
-#![feature(proc_macro)]
-#![feature(type_ascription)]
-#![feature(rustc_attrs)]
-
-// TODO: big deal to not have for stable!
-#![feature(integer_atomics)]
-
 // Clippy specific settings
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
 
-#![allow(len_without_is_empty)]
-#![allow(mutex_atomic)] // TODO: comment out and address AtomicBools
+#![allow(clippy::mutex_atomic)] // TODO: comment out and address AtomicBools
 
 
 // Serde specific settings

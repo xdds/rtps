@@ -1,6 +1,6 @@
 use common_types::*;
 
-const RTPS: &'static [u8; 4] = b"RTPS";
+const RTPS: &[u8; 4] = b"RTPS";
 pub const GUIDPREFIX_UNKNOWN: [u8; 12] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
 pub struct Header {

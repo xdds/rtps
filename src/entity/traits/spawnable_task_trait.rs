@@ -81,7 +81,7 @@ pub trait SpawnableTaskTrait {
         });
 
         SpawnableTaskHandle {
-            handle: handle,
+            handle,
             stop_signal: signal
         }
     }

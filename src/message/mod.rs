@@ -23,7 +23,7 @@ impl Message {
             junk: [82, 84, 80, 83],
             protocol_type: ProtocolVersion::VERSION_2_2,
             vendor_id: [86, 19],
-            submessages: submessages
+            submessages
         }
     }
 

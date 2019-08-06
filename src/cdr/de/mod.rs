@@ -36,27 +36,27 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
 
     fn deserialize_u8<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf : [u8; 1] = [0; 1];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         visitor.visit_u8(buf[0])
     }
 
     fn deserialize_u16<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf : [u8; 2] = [0; 2];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         let val = byteorder::BigEndian::read_u16(&buf[..]);
         visitor.visit_u16(val)
     }
 
     fn deserialize_u32<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf: [u8; 4] = [0; 4];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         let val = byteorder::BigEndian::read_u32(&buf[..]);
         visitor.visit_u32(val)
     }
 
     fn deserialize_u64<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf: [u8; 8] = [0; 8];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         let val = byteorder::BigEndian::read_u64(&buf[..]);
         visitor.visit_u64(val)
     }
@@ -67,7 +67,7 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
 
     fn deserialize_i8<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf : [u8; 1] = [0; 1];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         visitor.visit_i8(buf[0] as i8)
     }
 
@@ -77,7 +77,7 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
 
     fn deserialize_i32<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf: [u8; 4] = [0; 4];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         let val = byteorder::BigEndian::read_i32(&buf[..]);
         visitor.visit_i32(val)
     }
@@ -116,7 +116,7 @@ impl<'a,R: Read> serde::Deserializer for CdrDeserializer<'a,R> {
 
     fn deserialize_seq<V>(&mut self, mut visitor: V) -> Result<V::Value, Self::Error> where V: serde::de::Visitor {
         let mut buf: [u8; 4] = [0; 4];
-        try!(self.data.read(&mut buf));
+        try!(self.data.read_exact(&mut buf));
         let len = byteorder::BigEndian::read_u32(&buf[..]) as usize;
 
         let seq_visitor = CdrSeqVisitor::new(self,len, true);

@@ -23,10 +23,10 @@ impl CacheChange {
     pub fn new(kind: ChangeKind, writer_guid: Guid, instance_handle: InstanceHandle,
            sequence_number: SequenceNumber, data: ArcBuffer) -> Self {
         CacheChange {
-            kind: kind,
-            writer_guid: writer_guid,
-            instance_handle: instance_handle,
-            sequence_number: sequence_number,
+            kind,
+            writer_guid,
+            instance_handle,
+            sequence_number,
             data: data.clone(),
         }
     }

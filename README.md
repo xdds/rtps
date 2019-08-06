@@ -41,3 +41,7 @@ Code of Conduct
 Anyone who interacts with XDDS RTPS in any space including but not limited to this GitHub repository is expected to
 follow [our code of conduct](https://github.com/xdds/rtps/blob/master/CODE_OF_CONDUCT.md)
 
+Clippy
+===
+
+You can use the stable rustc, `rustup component add clippy`, and then try `cargo clippy`

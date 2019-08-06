@@ -1,7 +1,4 @@
-use std::{ fmt };
-
 use super::super::super::common_types::*;
-use super::super::super::sync::Monitor;
 use std::slice::Iter;
 
 pub type ErrorStr = &'static str;

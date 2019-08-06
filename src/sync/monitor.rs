@@ -10,7 +10,7 @@ struct MonitorInner<T> {
 }
 
 impl<T> fmt::Debug for Monitor<T> {
-    fn fmt(&self, mut formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "Monitor shows nothing for now" )
     }
 }
@@ -22,10 +22,6 @@ impl<T> Monitor<T> {
             predicate: (sync::Mutex::new(false), sync::Condvar::new())
         };
         Monitor( sync::Arc::new(inner) )
-    }
-
-    pub fn clone(&self) -> Self {
-        Monitor(self.0.clone())
     }
 
     pub fn wait(&self) -> Result<(),sync::PoisonError<sync::MutexGuard<bool>>> {
@@ -51,5 +47,11 @@ impl<T> Monitor<T> {
         *open = true;
         self.0.predicate.1.notify_all();
         Ok(())
+    }
+}
+
+impl<T> Clone for Monitor<T> {
+    fn clone(&self) -> Self {
+        Monitor(self.0.clone())
     }
 }

@@ -10,7 +10,7 @@ pub struct HistoryCache {
     changes: Vec<CacheChange>
 }
 
-const NOT_FOUND_ERR: &'static str = "not found";
+const NOT_FOUND_ERR: &str = "not found";
 
 impl HistoryCacheTrait for HistoryCache {
     fn new() -> Self {

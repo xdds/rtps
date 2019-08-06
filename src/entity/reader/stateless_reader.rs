@@ -118,7 +118,7 @@ impl SpawnableTaskTrait for StatelessReader {
 
                         let change = CacheChange::new(ChangeKind::ALIVE, writer_guid, InstanceHandle::new(), 0, serialized_payload);
 
-                        reader_cache.add_change(&change);
+                        reader_cache.add_change(&change).unwrap();
                         had_data = true;
                     },
                     other => {
@@ -129,7 +129,7 @@ impl SpawnableTaskTrait for StatelessReader {
         }
 
         if had_data {
-            self.reader_cache.wakeup_all();
+            self.reader_cache.wakeup_all().unwrap();
         }
 
         Ok(())

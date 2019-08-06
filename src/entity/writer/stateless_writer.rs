@@ -99,7 +99,7 @@ impl StatelessWriter {
         let min = self.writer_cache.get_seq_num_min().unwrap_or(0);
 
         let heartbeat = SubmessageVariant::Heartbeat {
-            reader_id: reader_id,
+            reader_id,
             writer_id: self.guid.entity_id,
 
             first_sn: min,
@@ -229,7 +229,7 @@ impl SpawnableTaskTrait for StatelessWriter {
 
         let (size, /* socketAddr */ _) = try!(socket.recv_from(buf));
         let data = &buf[0..size];
-        let mut reader = io::Cursor::new(data);
+        let mut _reader = io::Cursor::new(data);
 
         /*
         for change in self.writer_cache.iter() {
