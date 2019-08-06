@@ -2,9 +2,9 @@ sudo: false # run in a docker container
 dist: trusty # required for cmake version for fast-rtps
 language: rust
 rust:
-#  - stable
+ - stable
 #  - beta
-  - nightly-2016-11-06
+  # - nightly-2016-11-06
 addons:
   apt:
     packages:
